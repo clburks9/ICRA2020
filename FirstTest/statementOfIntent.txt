@@ -1,0 +1,9 @@
+
+Experiment Run #1:
+
+Comparison Testing between two types of modal dynamics accounting in POMCP
+Both methods embed modes as discrete states appended to the state vector
+The difference is in how they handle counting of states for exploration
+
+Method 1: Continue maintaining each nodes N(h) as a unified scalar count across modes
+Method 2: Vectorize N(h), with one count per mode determining exploration
