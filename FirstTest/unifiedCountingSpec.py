@@ -9,8 +9,8 @@ from softmaxModels import Softmax
 numActs= 5;
 numObs = 5;  
 gamma = .9; 
-maxTime = 0.5;
-maxDepth = 25;
+maxTime = 0.25;
+maxDepth = 15;
 c=1;
 maxTreeQueries = 1000; 
 problemName = '2DModalTrackingSimple'
