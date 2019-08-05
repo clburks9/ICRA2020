@@ -268,7 +268,7 @@ def simForward(steps = 10):
 def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 
 	#set up data collection
-	dataPackage = {'Meta':{'NumActs':numActs,'maxDepth':maxDepth,'c':c,'maxTreeQueries':maxTreeQueries,'maxTime':maxTime,'gamma':gamma,'numObs':numObs,'problemName':problemName},'Data':[]}
+	dataPackage = {'Meta':{'NumActs':numActs,'maxDepth':maxDepth,'c':c,'maxTreeQueries':maxTreeQueries,'maxTime':maxTime,'gamma':gamma,'numObs':numObs,'problemName':problemName,'fileName':'vectorizedPOMCP'},'Data':[]}
 	for i in range(0,sims):
 		dataPackage['Data'].append({'Beliefs':[],'States':[],'Actions':[],'Observations':[],'Rewards':[],'TreeInfo':[]}); 
 
