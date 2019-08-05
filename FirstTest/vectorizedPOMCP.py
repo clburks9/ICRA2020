@@ -124,7 +124,7 @@ class POMCP:
 			info = {"Execution Time":0,"Tree Queries":0,"Tree Size":0}
 			info['Execution Time'] = time.clock()-startTime; 
 			info['Tree Queries'] = count; 
-			info['Tree Size'] = len(h.traverse()); 
+			#info['Tree Size'] = len(h.traverse()); 
 			return np.argmax([a.Q for a in h]),info; 
 			#print([a.Q for a in h])
 		else:
@@ -270,7 +270,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 	#set up data collection
 	dataPackage = {'Meta':{'NumActs':numActs,'maxDepth':maxDepth,'c':c,'maxTreeQueries':maxTreeQueries,'maxTime':maxTime,'gamma':gamma,'numObs':numObs,'problemName':problemName},'Data':[]}
 	for i in range(0,sims):
-		dataPackage['Data'].append({'Beliefs':[],'States':[],'Actions':[],'Observations':[],'Rewards':[],'Times':[]}); 
+		dataPackage['Data'].append({'Beliefs':[],'States':[],'Actions':[],'Observations':[],'Rewards':[],'TreeInfo':[]}); 
 
 
 	print("Starting Data Collection Run: {}".format(simIdent)); 
@@ -303,10 +303,8 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 		dataPackage['Data'][count]['Beliefs'].append([mean,sd]); 
 		dataPackage['Data'][count]['States'].append(trueS); 
 		
-		for step in range(0,steps):
-			startTime = time.clock(); 
-			act = solver.search(sSet,h,False);
-			actTime = time.clock()-startTime;
+		for step in range(0,steps): 
+			act,info = solver.search(sSet,h,True);
 			trueS = generate_s(trueS,act); 
 			r = generate_r(trueS,act);
 			o = generate_o(trueS,act); 
@@ -330,7 +328,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 			dataPackage['Data'][count]['Actions'].append(act); 
 			dataPackage['Data'][count]['Observations'].append(o); 
 			dataPackage['Data'][count]['Rewards'].append(r); 
-			dataPackage['Data'][count]['Times'].append(actTime);
+			dataPackage['Data'][count]['TreeInfo'].append(info);
 
 		print("Accumlated Reward: {}".format(sum(dataPackage['Data'][count]['Rewards'])));
 		print("Average Final Reward: {}".format(sum([sum(dataPackage['Data'][i]['Rewards']) for i in range(0,count+1)])/(count+1)));
@@ -338,7 +336,6 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 		np.save('../data/dataVectored_E1_{}'.format(simIdent),dataPackage)
 
 	#save all data
-
 
 if __name__ == '__main__':
 

@@ -13,7 +13,7 @@ plt.plot(x,a[:,0,1],c='r');
 plt.show();
 
 
-times = data['Data'][0]['Times']; 
-print(times);
-plt.plot(times); 
-plt.show(); 
+qs = data['Data'][0]['TreeInfo'][0]['Execution Time'];
+print(qs)
+plt.plot(qs); 
+plt.show();
