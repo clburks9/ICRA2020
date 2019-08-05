@@ -342,7 +342,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 if __name__ == '__main__':
 
 	if(len(sys.argv) > 1):
-		runSims(1,10,simIdent=sys.argv[1]); 
+		runSims(100,100,simIdent=sys.argv[1]); 
 	else:
 		runSims(1,10); 
 
