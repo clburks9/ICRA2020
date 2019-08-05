@@ -318,6 +318,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 			dataPackage['Data'][count]['Rewards'].append(r); 
 
 		print("Accumlated Reward: {}".format(sum(dataPackage['Data'][count]['Rewards'])));
+		print("Average Final Reward: {}".format(sum([sum(dataPackage['Data'][i]['Rewards']) for i in range(0,count+1)])/(count+1)));
 		print(""); 
 		np.save('../data/dataVectored_E1_{}'.format(simIdent),dataPackage)
 
