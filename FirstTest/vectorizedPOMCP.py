@@ -292,7 +292,15 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 
 		trueS = sSet[np.random.choice([0,len(sSet)-1])];
 
-		dataPackage['Data'][count]['Beliefs'].append(sSet); 
+		#For storage purposes, only the mean and sd of the belief are kept
+		#dataPackage['Data'][count]['Beliefs'].append(sSet);
+		mean = [sum([sSet[i][2] for i in range(0,len(sSet))])/len(sSet),sum([sSet[i][3] for i in range(0,len(sSet))])/len(sSet)]; 
+		
+		tmpBel = np.array(sSet); 
+		mean = [np.mean(tmpBel[:,2]),np.mean(tmpBel[:,3])];
+		sd =  [np.std(tmpBel[:,2]),np.std(tmpBel[:,3])];
+
+		dataPackage['Data'][count]['Beliefs'].append([mean,sd]); 
 		dataPackage['Data'][count]['States'].append(trueS); 
 
 		for step in range(0,steps):
@@ -311,7 +319,11 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 				h = tmpHAct[0]; 
 				#print("Error: Child Node Not Found!!!"); 
 
-			dataPackage['Data'][count]['Beliefs'].append(sSet); 
+			tmpBel = np.array(h.data); 
+			mean = [np.mean(tmpBel[:,2]),np.mean(tmpBel[:,3])];
+			sd =  [np.std(tmpBel[:,2]),np.std(tmpBel[:,3])];
+
+			dataPackage['Data'][count]['Beliefs'].append([mean,sd]); 
 			dataPackage['Data'][count]['States'].append(trueS); 
 			dataPackage['Data'][count]['Actions'].append(act); 
 			dataPackage['Data'][count]['Observations'].append(o); 
@@ -330,6 +342,8 @@ if __name__ == '__main__':
 
 	if(len(sys.argv) > 1):
 		runSims(100,100,simIdent=sys.argv[1]); 
+	else:
+		runSims(1,100); 
 
 	#simForward(10); 
 
