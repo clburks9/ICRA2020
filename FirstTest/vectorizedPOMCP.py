@@ -3,7 +3,7 @@ warnings.simplefilter("ignore")
 
 import sys
 sys.path.append('../src'); 
-from treeNode import Node
+from vectorizedTreeNode import Node
 import numpy as np; 
 #from testProblemSpec import *;
 from unifiedCountingSpec import *; 
@@ -28,6 +28,7 @@ class POMCP:
 		#if not, add nodes for each action
 
 		h.data.append(s); 
+		m = s[4]; 
 
 		if(not h.hasChildren()):
 			for a in range(0,numActs):
@@ -36,7 +37,7 @@ class POMCP:
 
 
 		#find best action acccording to c
-		act = np.argmax([ha.Q + c*np.sqrt(np.log(h.N)/ha.N) for ha in h]); 
+		act = np.argmax([ha.Q + c*np.sqrt(np.log(h.N[m])/ha.N[m]) for ha in h]); 
 
 		#generate s,o,r
 		sprime = generate_s(s,act); 
@@ -58,9 +59,9 @@ class POMCP:
 		q = r + gamma*self.simulate(sprime,h[act].getChildByID(o),depth-1); 
 		
 		#update node values
-		h.N += 1; 
-		h[act].N += 1; 
-		h[act].Q += (q-h[act].Q)/h[act].N; 
+		h.N[m] += 1; 
+		h[act].N[m] += 1; 
+		h[act].Q += (q-h[act].Q)/sum(h[act].N); 
 		
 
 		return q; 
@@ -318,7 +319,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 
 		print("Accumlated Reward: {}".format(sum(dataPackage[c]['Rewards'])));
 		print(""); 
-		np.save('../data/dataUnified_E1_{}'.format(simIdent),dataPackage)
+		np.save('../data/dataVectored_E1_{}'.format(simIdent),dataPackage)
 
 	#save all data
 
@@ -327,9 +328,9 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 if __name__ == '__main__':
 
 	if(len(sys.argv) > 1):
-		runSims(100,100,simIdent=sys.argv[1]); 
+		runSims(1,1,simIdent=sys.argv[1]); 
 
-	#simForward(100); 
+	#simForward(10); 
 
 
 
