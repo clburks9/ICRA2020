@@ -15,6 +15,7 @@ import time;
 #from softmaxModels import Softmax;
 from copy import deepcopy 
 import random
+import time
 
 class POMCP:
 
@@ -269,7 +270,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 	#set up data collection
 	dataPackage = {'Meta':{'NumActs':numActs,'maxDepth':maxDepth,'c':c,'maxTreeQueries':maxTreeQueries,'maxTime':maxTime,'gamma':gamma,'numObs':numObs,'problemName':problemName},'Data':[]}
 	for i in range(0,sims):
-		dataPackage['Data'].append({'Beliefs':[],'States':[],'Actions':[],'Observations':[],'Rewards':[]}); 
+		dataPackage['Data'].append({'Beliefs':[],'States':[],'Actions':[],'Observations':[],'Rewards':[],'Times':[]}); 
 
 
 	print("Starting Data Collection Run: {}".format(simIdent)); 
@@ -301,9 +302,11 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 
 		dataPackage['Data'][count]['Beliefs'].append([mean,sd]); 
 		dataPackage['Data'][count]['States'].append(trueS); 
-
+		
 		for step in range(0,steps):
+			startTime = time.clock(); 
 			act = solver.search(sSet,h,False);
+			actTime = time.clock()-startTime;
 			trueS = generate_s(trueS,act); 
 			r = generate_r(trueS,act);
 			o = generate_o(trueS,act); 
@@ -327,6 +330,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 			dataPackage['Data'][count]['Actions'].append(act); 
 			dataPackage['Data'][count]['Observations'].append(o); 
 			dataPackage['Data'][count]['Rewards'].append(r); 
+			dataPackage['Data'][count]['Times'].append(actTime);
 
 		print("Accumlated Reward: {}".format(sum(dataPackage['Data'][count]['Rewards'])));
 		print("Average Final Reward: {}".format(sum([sum(dataPackage['Data'][i]['Rewards']) for i in range(0,count+1)])/(count+1)));

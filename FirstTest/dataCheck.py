@@ -11,3 +11,9 @@ x = [i for i in range(0,len(a))];
 plt.plot(x,a[:,0,0],c='b'); 
 plt.plot(x,a[:,0,1],c='r'); 
 plt.show();
+
+
+times = data['Data'][0]['Times']; 
+print(times);
+plt.plot(times); 
+plt.show(); 
