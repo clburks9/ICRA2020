@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt 
 
-data = np.load('../data/dataVectored_E1_Test.npy').item(); 
+data = np.load('../data/dataUnified_E1_Test.npy',allow_pickle=True,encoding='latin1').item(); 
 #print(data['Data'][0]['Beliefs'])
 
 bels = data['Data'][0]['Beliefs']; 
