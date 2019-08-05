@@ -7,3 +7,14 @@ The difference is in how they handle counting of states for exploration
 
 Method 1: Continue maintaining each nodes N(h) as a unified scalar count across modes
 Method 2: Vectorize N(h), with one count per mode determining exploration
+
+Problem: Three modes will move according to a set 2-layer HMM. 
+Modes: Stationary, Vertical, and Horizontal movement
+States: 2 agent states, 2 target states, 4 total
+Observations: Directional Observations from agent to target
+Rewards: +10 for being within 1 meter of target
+Bounds: 0,10 for each state
+
+Hypothesis: Method 2 will show better preformance
+
+Analysis: Average Time to Intercept, Total Number of Timesteps within reach, Distribution of gaps in capture
