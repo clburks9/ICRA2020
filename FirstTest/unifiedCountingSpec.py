@@ -9,10 +9,11 @@ from softmaxModels import Softmax
 numActs= 5;
 numObs = 5;  
 gamma = .9; 
-maxTime = 0.5; 
+maxTime = 1; 
 maxDepth = 15;
 c=10;
 maxTreeQueries = 10000; 
+problemName = '2DModalTrackingSimple'
 
 
 #Alright, let's do a 2D search problem

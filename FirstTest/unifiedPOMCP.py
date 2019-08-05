@@ -267,16 +267,16 @@ def simForward(steps = 10):
 def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 
 	#set up data collection
-	dataPackage = []; 
+	dataPackage = {'Meta':{'NumActs':numActs,'maxDepth':maxDepth,'c':c,'maxTreeQueries':maxTreeQueries,'maxTime':maxTime,'gamma':gamma,'numObs':numObs,'problemName':problemName},'Data':[]}
 	for i in range(0,sims):
-		dataPackage.append({'Beliefs':[],'States':[],'Actions':[],'Observations':[],'Rewards':[]}); 
+		dataPackage['Data'].append({'Beliefs':[],'States':[],'Actions':[],'Observations':[],'Rewards':[]}); 
 
 
 	print("Starting Data Collection Run: {}".format(simIdent)); 
 
 	#run individual sims
-	for c in range(0,sims):
-		print("Simulation: {} of {}".format(c+1,sims)); 
+	for count in range(0,sims):
+		print("Simulation: {} of {}".format(count+1,sims)); 
 		
 		#Make Problem
 		h = Node(); 
@@ -291,8 +291,8 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 
 		trueS = sSet[np.random.choice([0,len(sSet)-1])];
 
-		dataPackage[c]['Beliefs'].append(sSet); 
-		dataPackage[c]['States'].append(trueS); 
+		dataPackage['Data'][count]['Beliefs'].append(sSet); 
+		dataPackage['Data'][count]['States'].append(trueS); 
 
 		for step in range(0,steps):
 			act = solver.search(sSet,h,False);
@@ -310,13 +310,13 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test'):
 				h = tmpHAct[0]; 
 				#print("Error: Child Node Not Found!!!"); 
 
-			dataPackage[c]['Beliefs'].append(sSet); 
-			dataPackage[c]['States'].append(trueS); 
-			dataPackage[c]['Actions'].append(act); 
-			dataPackage[c]['Observations'].append(o); 
-			dataPackage[c]['Rewards'].append(r); 
+			dataPackage['Data'][count]['Beliefs'].append(sSet); 
+			dataPackage['Data'][count]['States'].append(trueS); 
+			dataPackage['Data'][count]['Actions'].append(act); 
+			dataPackage['Data'][count]['Observations'].append(o); 
+			dataPackage['Data'][count]['Rewards'].append(r); 
 
-		print("Accumlated Reward: {}".format(sum(dataPackage[c]['Rewards'])));
+		print("Accumlated Reward: {}".format(sum(dataPackage['Data'][count]['Rewards'])));
 		print(""); 
 		np.save('../data/dataUnified_E1_{}'.format(simIdent),dataPackage)
 
