@@ -113,11 +113,17 @@ def dipoleGenerate_s(s,a):
 
 	#Extract Mode info
 	
-	sprime[2] += np.random.normal(0,1.125)
-	sprime[3] += np.random.normal(0,1.125)
+	direct = sprime[5];
+	coin = np.random.random(); 
+	if(coin < 0.5):
+		sprime[2] += direct + np.random.normal(0,1.125)
+		sprime[3] += np.random.normal(0,0.125)
+	else:
+		sprime[2] += np.random.normal(0,0.125)
+		sprime[3] += direct + np.random.normal(0,1.125)
 	
 
-	agentSpeed = 1; 
+	agentSpeed = 0.5; 
 	if(a == 0):
 		sprime[0] -= agentSpeed
 	elif(a==1):
@@ -126,6 +132,23 @@ def dipoleGenerate_s(s,a):
 		sprime[1] += agentSpeed
 	elif(a == 3):
 		sprime[1] -= agentSpeed
+
+
+	#Handle Turning Around
+	if(sprime[2] < 0):
+		sprime[2] = 0; 
+		sprime[5] = -sprime[5]; 
+	elif(sprime[2] > 10):
+		sprime[2] = 10; 
+		sprime[5] = -sprime[5]; 
+	else:
+		if(sprime[3] < 0):
+			sprime[3] = 0; 
+			sprime[5] = -sprime[5]; 
+		elif(sprime[3] > 10):
+			sprime[3] = 10; 
+			sprime[5] = -sprime[5]; 
+
 
 	sprime[0] = min(10,max(0,sprime[0]));
 	sprime[1] = min(10,max(0,sprime[1]));

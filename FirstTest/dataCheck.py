@@ -53,5 +53,31 @@ def E1DirectionalNormalPlots(save = False):
 		plt.show();
 
 
+def E1DirectionalFirstCatchPlots(save=False):
+
+	names = ['Dipole','Unified','Vectored']
+	colors = ['r','b','g']; 
+
+	fig,axarr = plt.subplots(3,sharex=True); 
+	for n in names:
+		fileData = np.load('/mnt/c/Users/clbur/OneDrive/Work Docs/Projects/HARPS 2019/Data/data{}_E1_A.npy'.format(n),allow_pickle=True,encoding='latin1').item(); 
+
+		rewards = np.array([fileData['Data'][i]['Rewards'] for i in range(0,len(fileData['Data']))]);
+
+		firstReward = []; 
+		for r in rewards:
+			for i in range(0,len(r)):
+				if(r[i] != 0):
+					firstReward.append(i); 
+					break; 
+		axarr[names.index(n)].hist(firstReward,color=colors[names.index(n)]);
+		axarr[names.index(n)].axvline(np.mean(firstReward),c='k',linestyle='--'); 
+		print(n); 
+		print(np.mean(firstReward),np.std(firstReward)); 
+		print("");
+
+	plt.show();
+
 if __name__ == '__main__':
-	E1DirectionalNormalPlots(save=True);
+	#E1DirectionalNormalPlots(save=False);
+	E1DirectionalFirstCatchPlots()
