@@ -13,7 +13,7 @@ maxTime = 1;
 maxDepth = 25;
 c=1;
 maxTreeQueries = 10000; 
-problemName = '2DModalTrackingSimple'
+problemName = '2DModalTrackingMMS'
 
 
 #Alright, let's do a 2D search problem

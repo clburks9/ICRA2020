@@ -6,7 +6,7 @@ sys.path.append('../src');
 from treeNode import Node
 import numpy as np; 
 #from testProblemSpec import *;
-from unifiedCountingSpec import *; 
+from mmsCountingSpec import *; 
 import matplotlib.pyplot as plt
 
 import cProfile
