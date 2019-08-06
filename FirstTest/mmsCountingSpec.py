@@ -91,7 +91,7 @@ def generate_s(s,a):
 	#3: down
 
 	#Move the Agent
-	agentSpeed = 1; 
+	agentSpeed = 0.5; 
 	if(a == 0):
 		sprime[0] -= agentSpeed
 	elif(a==1):
