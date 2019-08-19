@@ -82,7 +82,22 @@ def E1DirectionalFirstCatchPlots(run='A',save=False):
 	else:
 		plt.show();
 
+def mquestActionAnalysis():
+	fileData = np.load('../data/dataToyMQuest_E1_-1.npy').item(); 
+	
+	allActions = [];
+	hist = np.zeros(shape=(8))
+	for run in fileData['Data']:
+		for a in run['Actions']:
+			allActions.append(a);
+			hist[a] += 1; 
+	print(sum(hist[0:5]),sum(hist[5:8]),sum(hist[0:5])/sum(hist))
+
+	plt.hist(allActions,bins=8); 
+	plt.show(); 
+
 if __name__ == '__main__':
-	run = 'B'
-	E1NormalPlots(run=run,save=True);
-	E1DirectionalFirstCatchPlots(run=run,save=True)
+	#run = 'B'
+	#E1NormalPlots(run=run,save=True);
+	#E1DirectionalFirstCatchPlots(run=run,save=True)
+	mquestActionAnalysis(); 
