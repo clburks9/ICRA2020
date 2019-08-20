@@ -96,8 +96,45 @@ def mquestActionAnalysis():
 	plt.hist(allActions,bins=8); 
 	plt.show(); 
 
+
+def toyProblemAnalysis(save=False):
+
+	names = ['Naive','Mode','MQuest','SQuest','Both']; 
+	colors = ['r','b','g','m','y']; 
+
+	fig,axarr = plt.subplots(5,sharex=True); 
+	for n in names: 
+
+		fileData = np.load('/mnt/c/Users/clbur/OneDrive/Work Docs/Projects/HARPS 2019/Data/dataToy{}_E1_A.npy'.format(n),allow_pickle=True,encoding='latin1').item(); 
+
+		rewards = np.array([fileData['Data'][i]['Rewards'] for i in range(0,len(fileData['Data']))]);
+
+		sumRew = [sum(rewards[i]) for i in range(0,len(rewards))]
+		print(n); 
+		print(np.mean(sumRew),np.std(sumRew)); 
+		print(""); 
+
+		axarr[names.index(n)].hist(sumRew,bins=10,density=True,color=colors[names.index(n)]);
+		mu,std = norm.fit(sumRew); 
+		#axarr[names.index(n)].set_xlim([100,800]); 
+		xmin,xmax = axarr[names.index(n)].get_xlim(); 
+		x = np.linspace(xmin,xmax,100); 
+		p = norm.pdf(x,mu,std); 
+		axarr[names.index(n)].plot(x,p,'k',linewidth=2); 
+		axarr[names.index(n)].axvline(np.mean(sumRew),c='k',linestyle='--'); 
+		
+		axarr[names.index(n)].set_ylabel(n); 
+	axarr[2].set_xlabel('Final Reward'); 
+	#axarr[1].set_ylabel('Frequency'); 
+	plt.suptitle("All Final Rewards")
+	if(save):
+		plt.savefig("/mnt/c/Users/clbur/OneDrive/Work Docs/Projects/HARPS 2019/img/dataE1Finals_{}.png".format(n)); 
+	else:
+		plt.show();
+
 if __name__ == '__main__':
 	#run = 'B'
 	#E1NormalPlots(run=run,save=True);
 	#E1DirectionalFirstCatchPlots(run=run,save=True)
-	mquestActionAnalysis(); 
+	#mquestActionAnalysis(); 
+	toyProblemAnalysis(); 

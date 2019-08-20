@@ -6,12 +6,12 @@ sys.path.append("../src");
 from softmaxModels import Softmax
 
 
-numActs= 8;
-numObs = 5;  
+numActs= 7;
+numObs = 4;  
 gamma = .9; 
 maxTime = 1;
-maxDepth = 15;
-c=1;
+maxDepth = 25;
+c=.5;
 maxTreeQueries = 10000; 
 problemName = 'MQuestMMS'
 agentSpeed = 1; 
@@ -87,7 +87,7 @@ def generate_s(s,a):
 
 
 	#Transition Mode
-	pmm = [[.90,.05,.05],[.05,.90,.05],[.05,.05,.9]]
+	pmm = [[.80,.1,.1],[.1,.80,.1],[.1,.1,.8]]
 
 	#print(sprime)
 	sprime[4] = np.random.choice([0,1,2],p=pmm[int(sprime[4])])
@@ -98,12 +98,11 @@ def generate_s(s,a):
 	#1: right
 	#2: up
 	#3: down
-	#4: stay
 
 	#questions:
-	#5: ask, is it mode 0? 
-	#6: ask, is it mode 1?
-	#7: ask, is it mode 2? 
+	#4: ask, is it mode 0? 
+	#5: ask, is it mode 1?
+	#6: ask, is it mode 2? 
 
 	#Move the Agent
 	#agentSpeed = .5; 
@@ -140,9 +139,9 @@ def generate_r(s,a):
 def generate_o(s,a):
 
 	#human observation likelihood
-	humanLike = .98; 
+	humanLike = .02; 
 
-	if(a == 5):
+	if(a == 4):
 		#asked 0
 		coin = np.random.random(); 
 		if(s[4] == 0 and coin > humanLike):
@@ -153,7 +152,7 @@ def generate_o(s,a):
 			return 'No';
 		elif(s[4] != 0 and coin < humanLike):
 			return 'Yes'
-	elif(a==6):
+	elif(a==5):
 		#asked 1
 		coin = np.random.random(); 
 		if(s[4] == 1 and coin > humanLike):
@@ -164,7 +163,7 @@ def generate_o(s,a):
 			return 'No';
 		elif(s[4] != 1 and coin < humanLike):
 			return 'Yes'
-	elif(a==7):
+	elif(a==6):
 		#asked 2
 		coin = np.random.random(); 
 		if(s[4] == 2 and coin > humanLike):
@@ -181,16 +180,13 @@ def generate_o(s,a):
 	##flip coin for noise
 	coin = np.random.random(); 
 	if(coin < 0.01):
-		return np.random.choice(['Near','Far','Caught'])
+		return np.random.choice(['Near','Far'])
 
 
-
-	if(dist(s) > 2):
-		return 'Far';
-	elif(dist(s) > 1):
-		return 'Near'; 
+	if(dist(s) > 1):
+		return 'Far'; 
 	else:
-		return 'Caught'; 
+		return 'Near'; 
 
 
 
@@ -212,7 +208,7 @@ def generate_o(s,a):
 def estimate_value(s,h):
 	#how far can you get in the depth left
 	
-	return min(10,1/dist(s));
+	return min(100,1/dist(s));
 
 def rollout(s,depth): 
 
@@ -226,9 +222,9 @@ def rollout(s,depth):
 			a=4
 		if(abs(di[0]) > abs(di[1])):
 			if(di[0] > 0):
-				a=0; 
+				a=1; 
 			else:
-				a=1;
+				a=0;
 		else:
 			if(di[1] > 0):
 				a=2;
