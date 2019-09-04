@@ -181,7 +181,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 	global numActs;
 
 	#set up data collection
-	dataPackage = {'Meta':{'NumActs':numActs,'maxDepth':maxDepth,'c':c,'maxTreeQueries':maxTreeQueries,'maxTime':maxTime,'gamma':gamma,'numObs':numObs,'problemName':problemName,'agentSpeed':agentSpeed,'targetMaxSpeed':targetMaxSpeed,'targetNoise':targetNoise},'Data':[]}
+	dataPackage = {'Meta':{'NumActs':numActs,'maxDepth':maxDepth,'c':c,'maxTreeQueries':maxTreeQueries,'maxTime':maxTime,'gamma':gamma,'numObs':numObs,'problemName':problemName,'agentSpeed':agentSpeed,'targetMaxSpeed':targetMaxSpeed,'targetNoise':targetNoise,'accuracy':accuracy,'availability':availability},'Data':[]}
 	for i in range(0,sims):
 		dataPackage['Data'].append({'Beliefs':[],'States':[],'Actions':[],'Observations':[],'Rewards':[],'TreeInfo':[]});
 
