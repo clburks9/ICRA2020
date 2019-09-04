@@ -18,7 +18,7 @@ agentSpeed = 50;
 targetMaxSpeed = 35; 
 targetNoise = 10; 
 allSketches = []; 
-availablility = 0.95; 
+availability = 0.95; 
 accuracy = .95;
 
 
@@ -177,7 +177,7 @@ def generate_o(s,a):
 			return 'Near'
 	else:
 		coin = np.random.random(); 
-		if(coin < 1-availablility):
+		if(coin < 1-availability):
 			return 'None';
 		atmp = a-4; 
 		#near,east,west,north,south for each
@@ -293,7 +293,7 @@ def obs_weight(s,a,o):
 			return downWeight
 	else:
 		if(o=='None'):
-			return 1-availablility; 
+			return 1-availability; 
 
 		upWeight = accuracy; 
 		downWeight = 1-accuracy; 

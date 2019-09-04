@@ -248,7 +248,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 
 			#print(act,numActs,len(allSketches));
 			dirs = ['near','east','west','north','south']
-			print(dirs[(act-4)%5],(act-4)//5,o); 
+			#print(dirs[(act-4)%5],(act-4)//5,o); 
 			#print(trueS[0],trueS[1]); 
 			#print("");
 

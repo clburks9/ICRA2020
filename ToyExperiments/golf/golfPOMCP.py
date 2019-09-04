@@ -219,7 +219,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 			r = generate_r(trueS,act);
 			o = generate_o(trueS,act); 
 
-			print(o);
+			#print(o);
 
 			tmpHAct = h.getChildByID(act); 
 			tmpHObs = tmpHAct.getChildByID(o); 
