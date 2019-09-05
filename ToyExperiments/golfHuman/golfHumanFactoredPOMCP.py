@@ -42,6 +42,7 @@ class POMCP:
 
 		#find best action acccording to c
 		act = np.argmax([ha.Q + c*np.sqrt(np.log(h.N)/ha.N) for ha in h]); 
+		#print(act);
 
 		#generate s,o,r
 		sprime = generate_s(s,act,truth=False); 
@@ -236,7 +237,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 			if(step%20 == 1):
 				tmp = np.random.choice([i for i in range(0,len(potentialSketches))],p=sketchProbs); 
 				addSketch(potentialSketches[tmp]);
-				numActs+=5; 
+				numActs+=20; 
 				sketchProbs[tmp] = 0; 
 				sketchProbs /= sum(sketchProbs); 
 
@@ -247,8 +248,8 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 			o = generate_o(trueS,act); 
 
 			#print(act,numActs,len(allSketches));
-			dirs = ['near','east','west','north','south']
-			print(dirs[(act-4)%5],(act-4)//5,o); 
+			#dirs = ['near','east','west','north','south']
+			#print(dirs[(act-4)%5],(act-4)//5,o); 
 			#print(trueS[0],trueS[1]); 
 			#print("");
 
@@ -307,7 +308,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 		print("Accumlated Reward: {}".format(sum(dataPackage['Data'][count]['Rewards'])));
 		print("Average Final Reward: {}".format(sum([sum(dataPackage['Data'][i]['Rewards']) for i in range(0,count+1)])/(count+1)));
 		print(""); 
-		np.save('../../data/dataGolfHuman_E1_{}'.format(simIdent),dataPackage)
+		np.save('../../data/dataGolfHumanFactored_E1_{}'.format(simIdent),dataPackage)
 
 	#save all data
 

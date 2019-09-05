@@ -13,7 +13,7 @@ maxTime = 1;
 maxDepth = 25;
 c=5;
 maxTreeQueries = 10000; 
-problemName = 'GolfHuman'
+problemName = 'GolfHumanFactored'
 agentSpeed = 50; 
 targetMaxSpeed = 35; 
 targetNoise = 10; 
@@ -33,6 +33,7 @@ def initialize():
 
 	global speedMap
 	global useMap
+
 	speedMap = ((speedImg[:,:,1] - .5*speedImg[:,:,0])/255 + 1.05); 
 	
 	speedMap = np.flip(speedMap,0); 
@@ -47,8 +48,10 @@ def addSketch(p):
 	global numActs; 
 	global useMap
 	global speedMap
+	global numObs
 
-	numActs += 5; 
+	numActs += 20; 
+	numObs += 5; 
 	allSketches.append(p); 
 
 	for i in range(-100+int(p[0]),100+int(p[0])):
@@ -57,8 +60,10 @@ def addSketch(p):
 				if(j>=0 and j<bounds[1]):
 					useMap[i,j] = speedMap[i,j]; 
 
+
+
 #new one
-def generate_s(s,a,truth=True):
+def generate_s(s,act,truth=True):
 
 	global useMap
 	global speedMap
@@ -69,6 +74,7 @@ def generate_s(s,a,truth=True):
 	#4,5: target xdot,ydot
 	sprime = deepcopy(s); 
 
+	a = act%4; 
 
 	if(a == 0):
 		sprime[0] -= agentSpeed
@@ -139,89 +145,107 @@ def generate_r(s,a):
 		else:
 			return 0;
 	else:
-		return -.2; 
+		return 0; 
 
 	#return max(100,1/dist(s)); 
 
 	#return 20-dist(s)
 
 
-def generate_o(s,a):
+def generate_o(s,act):
 	
 	# if(coin < 0.01):
 	# 	return np.random.choice(['Caught','Near','Far'])
 
+	global allSketches; 
 
 
-	##Non-response rate
+	toRet1 = ''; 
+	toRet = ''; 
+
+
+
+
+	#Non-response rate
 	coin = np.random.random(); 
 	flipped = .01; 
 
-	if(dist(s) > 150 and a<4):
+	if(dist(s) > 150):
 		if(coin>flipped):
-			return 'Far';
+			toRet1 = 'Far';
 		else:
-			return 'Near' 
+			toRet1 = 'Near' 
 	elif(dist(s) > 75 and dist(s)<150):
 		if(coin > flipped):
-			return 'Near';
+			toRet1 = 'Near';
 		else:
-			return np.random.choice(['Far','Caught']);  
+			toRet1 = np.random.choice(['Far','Caught']);  
 	elif(dist(s) < 75):
 		if(coin > flipped):
-			return 'Caught'
+			toRet1 = 'Caught'
 		else:
-			return 'Near'
-	else:
-		coin = np.random.random(); 
-		if(coin < 1-availablility):
-			return 'None';
-		atmp = a-4; 
-		#near,east,west,north,south for each
-		#atmp%5 = dir
-		#atmp//5 = sketch
-		sk = atmp//5; 
-		p = allSketches[sk]; 
-		dirs = atmp%5; 
+			toRet1 = 'Near'
+	
+	#If no question was asked
+	if(act<4):
+		return toRet1+','+'None'; 
 
-		coin = np.random.random(); 
-		flipped = 1-accuracy; 
+	#If human is not available
+	coin = np.random.random(); 
+	if(coin < 1-availability):
+		return toRet1 + ','+ 'None';
+	
 
-		toRet = ''; 
 
-		di = [s[2]-p[0],s[3]-p[1]]; 
-		if(np.sqrt(di[0]**2 + di[1]**2) < 75):
-			if(dirs==0):
-				toRet='Yes' if coin > flipped else 'No'
+	#near,east,west,north,south for each
+	#atmp%5 = dir
+	#atmp//5 = sketch
+	# sk = atmp//5; 
+	# p = allSketches[sk]; 
+	# dirs = atmp%5; 
+	sk = (act-4)//20; 
+	#print(len(allSketches),sk);
+	p = allSketches[sk]; 
+	dirs = ((act-4)%20)//4
+
+	coin = np.random.random(); 
+	flipped = 1-accuracy; 
+
+	toRet = ''; 
+
+	di = [s[2]-p[0],s[3]-p[1]]; 
+	if(np.sqrt(di[0]**2 + di[1]**2) < 75):
+		if(dirs==0):
+			toRet='Yes' if coin > flipped else 'No'
+		else:
+			toRet= 'No' if coin > flipped else 'Yes'
+	if(abs(di[0]) > abs(di[1])):
+		if(di[0] > 0):
+			#east 
+			if(dirs==1):
+				toRet= 'Yes' if coin > flipped else 'No'
 			else:
 				toRet= 'No' if coin > flipped else 'Yes'
-		if(abs(di[0]) > abs(di[1])):
-			if(di[0] > 0):
-				#east 
-				if(dirs==1):
-					toRet= 'Yes' if coin > flipped else 'No'
-				else:
-					toRet= 'No' if coin > flipped else 'Yes'
-			else:
-				#west
-				if(dirs==2):
-					toRet= 'Yes' if coin > flipped else 'No'
-				else:
-					toRet= 'No' if coin > flipped else 'Yes'
-
 		else:
-			if(di[1] > 0):
-				if(dirs==3):
-					toRet= 'Yes' if coin > flipped else 'No'
-				else:
-					toRet= 'No' if coin > flipped else 'Yes'
+			#west
+			if(dirs==2):
+				toRet= 'Yes' if coin > flipped else 'No'
 			else:
-				if(dirs==4):
-					toRet= 'Yes' if coin > flipped else 'No'
-				else:
-					toRet= 'No' if coin > flipped else 'Yes'
+				toRet= 'No' if coin > flipped else 'Yes'
 
-		return toRet
+	else:
+		if(di[1] > 0):
+			if(dirs==3):
+				toRet= 'Yes' if coin > flipped else 'No'
+			else:
+				toRet= 'No' if coin > flipped else 'Yes'
+		else:
+			if(dirs==4):
+				toRet= 'Yes' if coin > flipped else 'No'
+			else:
+				toRet= 'No' if coin > flipped else 'Yes'
+
+	return toRet1 + ',' + toRet
 
 
 def estimate_value(s,h):
@@ -266,80 +290,85 @@ def distance(a,b):
 def dist(s):
 	return np.sqrt((s[0]-s[2])**2 + (s[1]-s[3])**2); 
 
-def obs_weight(s,a,o):
+def obs_weight(s,act,o):
 
 
+	global allSketches
 
 	upWeight = 0.99; 
 	downWeight = 0.01; 
 
-	if(dist(s) > 150 and a<4):
-		if(o=='Far'):
-			return upWeight;
+	retWeight = 1; 
+
+	if(dist(s) > 150):
+		if('Far' in o):
+			retWeight*= upWeight;
 		else:
-			return downWeight 
+			retWeight*= downWeight 
 	elif(dist(s) > 75 and dist(s)<150):
-		if(o=='Near'):
-			return upWeight;
+		if('Near' in o):
+			retWeight*= upWeight;
 		else:
-			return downWeight;  
+			retWeight*= downWeight;  
 	elif(dist(s)<75):
-		if(o=='Caught'):
-			return upWeight
+		if('Caught' in o):
+			retWeight*= upWeight
 		else:
-			return downWeight
+			retWeight*= downWeight
+
+	if('None' in o and act>4):
+		return retWeight * (1-availability); 
+	elif('None' in o):
+		return retWeight; 
+
+	upWeight = accuracy; 
+	downWeight = 1-accuracy; 
+
+	#near,east,west,north,south for each
+	#atmp%5 = dir
+	#atmp//5 = sketch
+	sk = (act-4)//20; 
+	#print(len(allSketches),sk);
+	p = allSketches[sk]; 
+	dirs = ((act-4)%20)//4
+
+
+	mult = 0; 
+
+	di = [s[2]-p[0],s[3]-p[1]]; 
+	if(np.sqrt(di[0]**2 + di[1]**2) < 75):
+		if(dirs==0):
+			mult =upWeight if 'Yes' in o else downWeight; 
+		else:
+			mult=upWeight if 'No' in o else downWeight; 
+	if(abs(di[0]) > abs(di[1])):
+		if(di[0] > 0):
+			#east 
+			if(dirs==1):
+				mult=upWeight if 'Yes' in o else downWeight; 
+			else:
+				mult=upWeight if 'No' in o else downWeight; 
+		else:
+			#west
+			if(dirs==2):
+				mult=upWeight if 'Yes' in o else downWeight; 
+			else:
+				mult=upWeight if 'No' in o else downWeight; 
+
 	else:
-		if(o=='None'):
-			return 1-availablility; 
-
-		upWeight = accuracy; 
-		downWeight = 1-accuracy; 
-
-		atmp = a-4; 
-		#near,east,west,north,south for each
-		#atmp%5 = dir
-		#atmp//5 = sketch
-		sk = atmp//5; 
-		p = allSketches[sk]; 
-		dirs = atmp%5; 
-
-
-		toRet = 0; 
-
-
-		di = [s[2]-p[0],s[3]-p[1]]; 
-		if(np.sqrt(di[0]**2 + di[1]**2) < 75):
-			if(dirs==0):
-				toRet=upWeight if o=='Yes' else downWeight; 
+		if(di[1] > 0):
+			if(dirs==3):
+				mult=upWeight if 'Yes' in o else downWeight; 
 			else:
-				toRet=upWeight if o=='No' else downWeight; 
-		if(abs(di[0]) > abs(di[1])):
-			if(di[0] > 0):
-				#east 
-				if(dirs==1):
-					toRet=upWeight if o=='Yes' else downWeight; 
-				else:
-					toRet=upWeight if o=='No' else downWeight; 
-			else:
-				#west
-				if(dirs==2):
-					toRet=upWeight if o=='Yes' else downWeight; 
-				else:
-					toRet=upWeight if o=='No' else downWeight; 
-
+				mult=upWeight if 'No' in o else downWeight; 
 		else:
-			if(di[1] > 0):
-				if(dirs==3):
-					toRet=upWeight if o=='Yes' else downWeight; 
-				else:
-					toRet=upWeight if o=='No' else downWeight; 
+			if(dirs==4):
+				mult=upWeight if 'Yes' in o else downWeight; 
 			else:
-				if(dirs==4):
-					toRet=upWeight if o=='Yes' else downWeight; 
-				else:
-					toRet=upWeight if o=='No' else downWeight; 
+				mult=upWeight if 'No' in o else downWeight; 
 
-		return toRet; 
+	retWeight *= mult; 
+	return retWeight; 
 
 
 
