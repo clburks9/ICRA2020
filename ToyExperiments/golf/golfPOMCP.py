@@ -186,7 +186,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 
 	#run individual sims
 	for count in range(0,sims):
-		#np.random.seed(count+120243123); 
+		np.random.seed(count+120243123); 
 		print("Simulation: {} of {}".format(count+1,sims)); 
 		
 		#Make Problem

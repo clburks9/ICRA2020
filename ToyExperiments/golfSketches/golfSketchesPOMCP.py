@@ -154,7 +154,7 @@ def propogateAndMeasure(sSet,act,o):
 	upWeight = .99; 
 	downWeight = .01; 
 	for i in range(0,len(s)):
-		weights[i] = obs_weight(s[i],act,o); 
+		weights[i] = obs_weight(s[i],o); 
 		
 
 	weights /= np.sum(weights); 
@@ -198,7 +198,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 	allFirstCatches = []; 
 	#run individual sims
 	for count in range(0,sims):
-		#np.random.seed(count+120243123); 
+		np.random.seed(count+120243123); 
 		print("Simulation: {} of {}".format(count+1,sims)); 
 		
 		#Make Problem
