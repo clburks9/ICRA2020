@@ -8,14 +8,14 @@ from PIL import Image
 
 numActs= 4;
 numObs = 2;  
-gamma = .95; 
+gamma = .9; 
 maxTime = 1;
 maxDepth = 25;
-c=1;
+c=5;
 maxTreeQueries = 10000; 
 problemName = 'GolfHuman'
 agentSpeed = 50; 
-targetMaxSpeed = 25; 
+targetMaxSpeed = 35; 
 targetNoise = 10; 
 allSketches = []; 
 availability = 0.95; 
@@ -33,7 +33,7 @@ def initialize():
 
 	global speedMap
 	global useMap
-	speedMap = ((speedImg[:,:,1] - .5*speedImg[:,:,0])/255 + 1.1); 
+	speedMap = ((speedImg[:,:,1] - .5*speedImg[:,:,0])/255 + 1.05); 
 	
 	speedMap = np.flip(speedMap,0); 
 	speedMap = np.transpose(speedMap)
@@ -51,9 +51,9 @@ def addSketch(p):
 	numActs += 5; 
 	allSketches.append(p); 
 
-	for i in range(-150+int(p[0]),150+int(p[0])):
+	for i in range(-100+int(p[0]),100+int(p[0])):
 		if(i>=0 and i<bounds[0]):
-			for j in range(-150+int(p[0]),150+int(p[0])):
+			for j in range(-100+int(p[0]),100+int(p[0])):
 				if(j>=0 and j<bounds[1]):
 					useMap[i,j] = speedMap[i,j]; 
 
@@ -70,18 +70,14 @@ def generate_s(s,a,truth=True):
 	sprime = deepcopy(s); 
 
 
-	if(truth):
-		modifier = speedMap[int(s[0]),int(s[1])]; 
-	else:
-		modifier = useMap[int(s[0]),int(s[1])]; 
 	if(a == 0):
-		sprime[0] -= agentSpeed*modifier
+		sprime[0] -= agentSpeed
 	elif(a==1):
-		sprime[0] += agentSpeed*modifier
+		sprime[0] += agentSpeed
 	elif(a == 2):
-		sprime[1] += agentSpeed*modifier
+		sprime[1] += agentSpeed
 	elif(a == 3):
-		sprime[1] -= agentSpeed*modifier
+		sprime[1] -= agentSpeed
 
 	sprime[0] = min(bounds[0],max(0,sprime[0]));
 	sprime[1] = min(bounds[1],max(0,sprime[1]));
@@ -143,7 +139,7 @@ def generate_r(s,a):
 		else:
 			return 0;
 	else:
-		return 0; 
+		return -.2; 
 
 	#return max(100,1/dist(s)); 
 
@@ -151,9 +147,6 @@ def generate_r(s,a):
 
 
 def generate_o(s,a):
-
-
-
 	
 	# if(coin < 0.01):
 	# 	return np.random.choice(['Caught','Near','Far'])
@@ -162,7 +155,7 @@ def generate_o(s,a):
 
 	##Non-response rate
 	coin = np.random.random(); 
-	flipped = .02; 
+	flipped = .01; 
 
 	if(dist(s) > 150 and a<4):
 		if(coin>flipped):
@@ -170,10 +163,10 @@ def generate_o(s,a):
 		else:
 			return 'Near' 
 	elif(dist(s) > 75 and dist(s)<150):
-		if(coin>flipped):
-			return 'Near'
+		if(coin > flipped):
+			return 'Near';
 		else:
-			return 'Caught'
+			return np.random.choice(['Far','Caught']);  
 	elif(dist(s) < 75):
 		if(coin > flipped):
 			return 'Caught'
@@ -181,7 +174,7 @@ def generate_o(s,a):
 			return 'Near'
 	else:
 		coin = np.random.random(); 
-		if(coin < 1-availability):
+		if(coin < 1-availablility):
 			return 'None';
 		atmp = a-4; 
 		#near,east,west,north,south for each
@@ -234,7 +227,7 @@ def generate_o(s,a):
 def estimate_value(s,h):
 	#how far can you get in the depth left
 	
-	return min(10,1/dist(s));
+	return min(100,1/dist(s));
 
 
 def rollout(s,depth): 
@@ -277,8 +270,8 @@ def obs_weight(s,a,o):
 
 
 
-	upWeight = 0.98; 
-	downWeight = 0.02; 
+	upWeight = 0.99; 
+	downWeight = 0.01; 
 
 	if(dist(s) > 150 and a<4):
 		if(o=='Far'):
@@ -287,9 +280,9 @@ def obs_weight(s,a,o):
 			return downWeight 
 	elif(dist(s) > 75 and dist(s)<150):
 		if(o=='Near'):
-			return upWeight; 
+			return upWeight;
 		else:
-			return downWeight; 
+			return downWeight;  
 	elif(dist(s)<75):
 		if(o=='Caught'):
 			return upWeight
@@ -297,7 +290,7 @@ def obs_weight(s,a,o):
 			return downWeight
 	else:
 		if(o=='None'):
-			return 1-availability; 
+			return 1-availablility; 
 
 		upWeight = accuracy; 
 		downWeight = 1-accuracy; 

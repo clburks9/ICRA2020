@@ -2,9 +2,9 @@ import numpy as np
 from copy import deepcopy
 import sys
 import matplotlib.pyplot as plt
-sys.path.append("../../src"); 
+sys.path.append("../src"); 
 from PIL import Image
-from softmaxModels import Softmax
+
 
 numActs= 4;
 numObs = 2;  
@@ -13,15 +13,19 @@ maxTime = 1;
 maxDepth = 25;
 c=1;
 maxTreeQueries = 10000; 
-problemName = 'GolfMMS'
+problemName = 'GolfSketches'
 agentSpeed = 50; 
 targetMaxSpeed = 25; 
 targetNoise = 10; 
+allSketches = []; 
+availability = 0.95; 
+accuracy = .95;
+
 
 bounds = [828-1,828-1]; 
 
 speedMap = None; 
-
+useMap = None; 
 
 def initialize():
 	speedImg = Image.open('../../img/bigGolfSpeed.png'); 
@@ -34,9 +38,24 @@ def initialize():
 	speedMap = np.flip(speedMap,0); 
 	speedMap = np.transpose(speedMap)
 	useMap = np.ones(shape=speedMap.shape); 
-	
+	# plt.imshow(speedMap,origin='lower'); 
+	# plt.show();
 
 
+def addSketch(p):
+	global allSketches; 
+	global numActs; 
+	global useMap
+	global speedMap
+
+	# numActs += 5; 
+	allSketches.append(p); 
+
+	for i in range(-150+int(p[0]),150+int(p[0])):
+		if(i>=0 and i<bounds[0]):
+			for j in range(-150+int(p[0]),150+int(p[0])):
+				if(j>=0 and j<bounds[1]):
+					useMap[i,j] = speedMap[i,j]; 
 
 #new one
 def generate_s(s,a,truth=True):
@@ -49,6 +68,7 @@ def generate_s(s,a,truth=True):
 	#2,3: target x,y
 	#4,5: target xdot,ydot
 	sprime = deepcopy(s); 
+
 
 	if(truth):
 		modifier = speedMap[int(s[0]),int(s[1])]; 
@@ -124,11 +144,6 @@ def generate_r(s,a):
 		return 0;
 
 
-	#return max(100,1/dist(s)); 
-
-	#return 20-dist(s)
-
-
 def generate_o(s,a):
 
 
@@ -153,13 +168,12 @@ def generate_o(s,a):
 			return 'Near';
 
 
-	
-
 
 def estimate_value(s,h):
 	#how far can you get in the depth left
 	
 	return min(10,1/dist(s));
+
 
 def rollout(s,depth): 
 
@@ -216,6 +230,9 @@ def obs_weight(s,o):
 			return upWeight; 
 		else:
 			return downWeight; 
+
+
+
 
 if __name__ == '__main__':
 	

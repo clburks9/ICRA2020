@@ -6,7 +6,7 @@ sys.path.append('../../src');
 from treeNode import Node
 import numpy as np; 
 #from testProblemSpec import *;
-from golfHumanSpec import *; 
+from golfHumanFactoredSpec import *; 
 import matplotlib.pyplot as plt
 
 import cProfile
@@ -54,8 +54,8 @@ class POMCP:
 		#else recurse 
 		if(o not in h[act].getChildrenIDs()):
 			h[act].addChildID(o); 
-			return estimate_value(s,h[act]); 
-			#return rollout(s,depth); 
+			#return estimate_value(s,h[act]); 
+			return rollout(s,depth); 
 		
 		if(isTerminal(s,act)):
 			return r
@@ -195,10 +195,10 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 	sketchProbs = np.ones(shape=(len(potentialSketches))); 
 	sketchProbs /= sum(sketchProbs); 
 
-	allFirstCatches = []; 
+
 	#run individual sims
 	for count in range(0,sims):
-		#np.random.seed(count+120243123); 
+		np.random.seed(count+120243); 
 		print("Simulation: {} of {}".format(count+1,sims)); 
 		
 		#Make Problem
@@ -246,13 +246,9 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 			r = max(0,generate_r(trueS,act));
 			o = generate_o(trueS,act); 
 
-
-			if(sum(dataPackage['Data'][count]['Rewards']) == 0 and r!=0):
-				allFirstCatches.append(step); 
-
 			#print(act,numActs,len(allSketches));
 			dirs = ['near','east','west','north','south']
-			#print(dirs[(act-4)%5],(act-4)//5,o); 
+			print(dirs[(act-4)%5],(act-4)//5,o); 
 			#print(trueS[0],trueS[1]); 
 			#print("");
 
@@ -303,15 +299,13 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 				ax.axis('equal')
 				plt.xlim([0,bounds[0]]); 
 				plt.ylim([0,bounds[1]]); 
-				ax.axis('off')
+				#ax.axis('off')
 				plt.pause(0.001)
 
 				plt.cla();
 
-		print("First Capture: {}".format(allFirstCatches[-1])); 
 		print("Accumlated Reward: {}".format(sum(dataPackage['Data'][count]['Rewards'])));
 		print("Average Final Reward: {}".format(sum([sum(dataPackage['Data'][i]['Rewards']) for i in range(0,count+1)])/(count+1)));
-		print("Average First Capture: {}".format(np.mean(allFirstCatches))); 
 		print(""); 
 		np.save('../../data/dataGolfHuman_E1_{}'.format(simIdent),dataPackage)
 

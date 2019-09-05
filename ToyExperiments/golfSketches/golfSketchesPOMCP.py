@@ -6,7 +6,7 @@ sys.path.append('../../src');
 from treeNode import Node
 import numpy as np; 
 #from testProblemSpec import *;
-from golfHumanSpec import *; 
+from golfSketchesSpec import *; 
 import matplotlib.pyplot as plt
 
 import cProfile
@@ -236,7 +236,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 			if(step%20 == 1):
 				tmp = np.random.choice([i for i in range(0,len(potentialSketches))],p=sketchProbs); 
 				addSketch(potentialSketches[tmp]);
-				numActs+=5; 
+				#numActs+=5; 
 				sketchProbs[tmp] = 0; 
 				sketchProbs /= sum(sketchProbs); 
 
@@ -303,7 +303,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 				ax.axis('equal')
 				plt.xlim([0,bounds[0]]); 
 				plt.ylim([0,bounds[1]]); 
-				ax.axis('off')
+				#ax.axis('off')
 				plt.pause(0.001)
 
 				plt.cla();
@@ -313,7 +313,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 		print("Average Final Reward: {}".format(sum([sum(dataPackage['Data'][i]['Rewards']) for i in range(0,count+1)])/(count+1)));
 		print("Average First Capture: {}".format(np.mean(allFirstCatches))); 
 		print(""); 
-		np.save('../../data/dataGolfHuman_E1_{}'.format(simIdent),dataPackage)
+		np.save('../../data/dataGolfSketches_E1_{}'.format(simIdent),dataPackage)
 
 	#save all data
 
