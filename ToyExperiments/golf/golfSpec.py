@@ -14,9 +14,9 @@ maxDepth = 25;
 c=1;
 maxTreeQueries = 10000; 
 problemName = 'GolfMMS'
-agentSpeed = 40; 
-targetMaxSpeed = 10; 
-targetNoise = 5; 
+agentSpeed = 50; 
+targetMaxSpeed = 25; 
+targetNoise = 10; 
 
 bounds = [828-1,828-1]; 
 

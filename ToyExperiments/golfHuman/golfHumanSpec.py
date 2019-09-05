@@ -14,9 +14,9 @@ maxDepth = 25;
 c=1;
 maxTreeQueries = 10000; 
 problemName = 'GolfHuman'
-agentSpeed = 40; 
-targetMaxSpeed = 10; 
-targetNoise = 5; 
+agentSpeed = 50; 
+targetMaxSpeed = 25; 
+targetNoise = 10; 
 allSketches = []; 
 availability = 0.95; 
 accuracy = .95;
@@ -51,9 +51,9 @@ def addSketch(p):
 	numActs += 5; 
 	allSketches.append(p); 
 
-	for i in range(-100+int(p[0]),100+int(p[0])):
+	for i in range(-150+int(p[0]),150+int(p[0])):
 		if(i>=0 and i<bounds[0]):
-			for j in range(-100+int(p[0]),100+int(p[0])):
+			for j in range(-150+int(p[0]),150+int(p[0])):
 				if(j>=0 and j<bounds[1]):
 					useMap[i,j] = speedMap[i,j]; 
 

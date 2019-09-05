@@ -182,6 +182,8 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 	#set up transition modes
 	initialize(); 
 
+	allFirstCatches = []; 
+
 	#run individual sims
 	for count in range(0,sims):
 		#np.random.seed(count+120243123); 
@@ -218,6 +220,9 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 			trueS = generate_s(trueS,act,truth=True); 
 			r = generate_r(trueS,act);
 			o = generate_o(trueS,act); 
+
+			if(sum(dataPackage['Data'][count]['Rewards']) == 0 and r!=0):
+				allFirstCatches.append(step); 
 
 			#print(o);
 
@@ -268,8 +273,12 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 
 				plt.cla();
 
+		#if(sum(dataPackage['Data'][count]['Rewards']) == 0):
+			#allFirstCatches.append(-1); 
+		print("First Capture: {}".format(allFirstCatches[-1])); 
 		print("Accumlated Reward: {}".format(sum(dataPackage['Data'][count]['Rewards'])));
 		print("Average Final Reward: {}".format(sum([sum(dataPackage['Data'][i]['Rewards']) for i in range(0,count+1)])/(count+1)));
+		print("Average First Capture: {}".format(np.mean(allFirstCatches))); 
 		print(""); 
 		np.save('../../data/dataGolf_E1_{}'.format(simIdent),dataPackage)
 
