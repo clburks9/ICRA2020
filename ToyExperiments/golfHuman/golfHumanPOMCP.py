@@ -54,8 +54,8 @@ class POMCP:
 		#else recurse 
 		if(o not in h[act].getChildrenIDs()):
 			h[act].addChildID(o); 
-			#return estimate_value(s,h[act]); 
-			return rollout(s,depth); 
+			return estimate_value(s,h[act]); 
+			#return rollout(s,depth); 
 		
 		if(isTerminal(s,act)):
 			return r
@@ -198,7 +198,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 
 	#run individual sims
 	for count in range(0,sims):
-		np.random.seed(count+120243); 
+		#np.random.seed(count+120243123); 
 		print("Simulation: {} of {}".format(count+1,sims)); 
 		
 		#Make Problem

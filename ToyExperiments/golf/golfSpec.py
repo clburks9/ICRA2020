@@ -6,23 +6,22 @@ sys.path.append("../../src");
 from PIL import Image
 from softmaxModels import Softmax
 
-numActs= 5;
+numActs= 4;
 numObs = 2;  
-gamma = .9; 
+gamma = .95; 
 maxTime = 1;
 maxDepth = 25;
-c=.5;
+c=1;
 maxTreeQueries = 10000; 
 problemName = 'GolfMMS'
-agentSpeed = 50; 
-targetMaxSpeed = 35; 
-targetNoise = 10; 
+agentSpeed = 40; 
+targetMaxSpeed = 10; 
+targetNoise = 5; 
 
 bounds = [828-1,828-1]; 
 
 speedMap = None; 
-modelNear = None; 
-modelCaught = None; 
+
 
 def initialize():
 	speedImg = Image.open('../../img/bigGolfSpeed.png'); 
@@ -30,7 +29,7 @@ def initialize():
 
 	global speedMap
 	global useMap
-	speedMap = ((speedImg[:,:,1] - .5*speedImg[:,:,0])/255 + 1.05); 
+	speedMap = ((speedImg[:,:,1] - .5*speedImg[:,:,0])/255 + 1.1); 
 	
 	speedMap = np.flip(speedMap,0); 
 	speedMap = np.transpose(speedMap)
@@ -132,23 +131,18 @@ def generate_o(s,a):
 
 	# ##flip coin for non-response
 	coin = np.random.random(); 
-	flipped = .01; 
+	flipped = .02; 
 
-	if(dist(s) > 150):
+	if(dist(s) > 75):
 		if(coin>flipped):
 			return 'Far';
 		else:
 			return 'Near' 
-	elif(dist(s) > 75 and dist(s)<150):
-		if(coin > flipped):
-			return 'Near';
-		else:
-			return np.random.choice(['Far','Caught']);  
 	elif(dist(s) < 75):
 		if(coin > flipped):
-			return 'Caught'
-		else:
 			return 'Near'
+		else:
+			return 'Far'
 
 
 	
@@ -157,7 +151,7 @@ def generate_o(s,a):
 def estimate_value(s,h):
 	#how far can you get in the depth left
 	
-	return min(100,1/dist(s));
+	return min(10,1/dist(s));
 
 def rollout(s,depth): 
 
@@ -196,21 +190,16 @@ def dist(s):
 	return np.sqrt((s[0]-s[2])**2 + (s[1]-s[3])**2); 
 
 def obs_weight(s,o):
-	upWeight = 0.99; 
-	downWeight = 0.01; 
+	upWeight = 0.98; 
+	downWeight = 0.02; 
 
-	if(dist(s) > 150):
+	if(dist(s) > 75):
 		if(o=='Far'):
 			return upWeight;
 		else:
-			return downWeight 
-	elif(dist(s) > 75 and dist(s)<150):
-		if(o=='Near'):
-			return upWeight;
-		else:
-			return downWeight;  
+			return downWeight  
 	elif(dist(s)<75):
-		if(o=='Caught'):
+		if(o=='Near'):
 			return upWeight
 		else:
 			return downWeight

@@ -43,7 +43,7 @@ class POMCP:
 		act = np.argmax([ha.Q + c*np.sqrt(np.log(h.N)/ha.N) for ha in h]); 
 
 		#generate s,o,r
-		sprime = generate_s(s,act); 
+		sprime = generate_s(s,act,truth=False); 
 		o = generate_o(sprime,act); 
 		r = generate_r(s,act); 
 
@@ -184,7 +184,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 
 	#run individual sims
 	for count in range(0,sims):
-		np.random.seed(count+120243); 
+		#np.random.seed(count+120243123); 
 		print("Simulation: {} of {}".format(count+1,sims)); 
 		
 		#Make Problem
@@ -215,7 +215,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 		
 		for step in range(0,steps): 
 			act,info = solver.search(sSet,h,depth = min(maxDepth,steps-step+1),inform=True);
-			trueS = generate_s(trueS,act); 
+			trueS = generate_s(trueS,act,truth=True); 
 			r = generate_r(trueS,act);
 			o = generate_o(trueS,act); 
 

@@ -8,15 +8,15 @@ from PIL import Image
 
 numActs= 4;
 numObs = 2;  
-gamma = .9; 
+gamma = .95; 
 maxTime = 1;
 maxDepth = 25;
-c=.5;
+c=1;
 maxTreeQueries = 10000; 
 problemName = 'GolfHuman'
-agentSpeed = 50; 
-targetMaxSpeed = 35; 
-targetNoise = 10; 
+agentSpeed = 40; 
+targetMaxSpeed = 10; 
+targetNoise = 5; 
 allSketches = []; 
 availability = 0.95; 
 accuracy = .95;
@@ -33,7 +33,7 @@ def initialize():
 
 	global speedMap
 	global useMap
-	speedMap = ((speedImg[:,:,1] - .5*speedImg[:,:,0])/255 + 1.05); 
+	speedMap = ((speedImg[:,:,1] - .5*speedImg[:,:,0])/255 + 1.1); 
 	
 	speedMap = np.flip(speedMap,0); 
 	speedMap = np.transpose(speedMap)
@@ -139,7 +139,7 @@ def generate_r(s,a):
 		else:
 			return 0;
 	else:
-		return -.2; 
+		return 0; 
 
 	#return max(100,1/dist(s)); 
 
@@ -158,23 +158,18 @@ def generate_o(s,a):
 
 	##Non-response rate
 	coin = np.random.random(); 
-	flipped = .01; 
+	flipped = .02; 
 
-	if(dist(s) > 150 and a<4):
+	if(dist(s) > 75 and a<4):
 		if(coin>flipped):
 			return 'Far';
 		else:
 			return 'Near' 
-	elif(dist(s) > 75 and dist(s)<150):
-		if(coin > flipped):
-			return 'Near';
-		else:
-			return np.random.choice(['Far','Caught']);  
 	elif(dist(s) < 75):
 		if(coin > flipped):
-			return 'Caught'
-		else:
 			return 'Near'
+		else:
+			return 'Far'
 	else:
 		coin = np.random.random(); 
 		if(coin < 1-availability):
@@ -230,7 +225,7 @@ def generate_o(s,a):
 def estimate_value(s,h):
 	#how far can you get in the depth left
 	
-	return min(100,1/dist(s));
+	return min(10,1/dist(s));
 
 
 def rollout(s,depth): 
@@ -273,21 +268,16 @@ def obs_weight(s,a,o):
 
 
 
-	upWeight = 0.99; 
-	downWeight = 0.01; 
+	upWeight = 0.98; 
+	downWeight = 0.02; 
 
-	if(dist(s) > 150 and a<4):
+	if(dist(s) > 75 and a<4):
 		if(o=='Far'):
 			return upWeight;
 		else:
 			return downWeight 
-	elif(dist(s) > 75 and dist(s)<150):
-		if(o=='Near'):
-			return upWeight;
-		else:
-			return downWeight;  
 	elif(dist(s)<75):
-		if(o=='Caught'):
+		if(o=='Near'):
 			return upWeight
 		else:
 			return downWeight
