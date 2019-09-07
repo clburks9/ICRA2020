@@ -6,7 +6,7 @@ sys.path.append('../../src');
 from treeNode import Node
 import numpy as np; 
 #from testProblemSpec import *;
-from golfHumanFactoredSpec import *; 
+from golfHumanDirsSpec import *; 
 import matplotlib.pyplot as plt
 
 import cProfile
@@ -199,7 +199,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 
 	#run individual sims
 	for count in range(0,sims):
-		np.random.seed(count+120243); 
+		np.random.seed(count+120244); 
 		print("Simulation: {} of {}".format(count+1,sims)); 
 		
 		#Make Problem
@@ -237,7 +237,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 			if(step%20 == 1):
 				tmp = np.random.choice([i for i in range(0,len(potentialSketches))],p=sketchProbs); 
 				addSketch(potentialSketches[tmp]);
-				numActs+=10; 
+				numActs+=4; 
 				sketchProbs[tmp] = 0; 
 				sketchProbs /= sum(sketchProbs); 
 
@@ -247,7 +247,10 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 			r = max(0,generate_r(trueS,act));
 			o = generate_o(trueS,act); 
 
-			#print(act,numActs,len(allSketches));
+
+
+
+			print(act,(act-4)//4);
 			#dirs = ['near','east','west','north','south']
 			#print(dirs[(act-4)%5],(act-4)//5,o); 
 			#print(trueS[0],trueS[1]); 
