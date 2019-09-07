@@ -54,8 +54,8 @@ class POMCP:
 		#else recurse 
 		if(o not in h[act].getChildrenIDs()):
 			h[act].addChildID(o); 
-			return estimate_value(s,h[act]); 
-			#return rollout(s,depth); 
+			#return estimate_value(s,h[act]); 
+			return rollout(s,depth); 
 		
 		if(isTerminal(s,act)):
 			return r
