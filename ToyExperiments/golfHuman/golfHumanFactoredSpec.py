@@ -39,6 +39,15 @@ def initialize():
 	speedMap = np.flip(speedMap,0); 
 	speedMap = np.transpose(speedMap)
 	useMap = np.ones(shape=speedMap.shape); 
+	global allSketches
+	allSketches = []; 
+
+	global numActs
+	global numObs
+	numActs = 4; 
+	numObs = 2; 
+	
+
 	# plt.imshow(speedMap,origin='lower'); 
 	# plt.show();
 

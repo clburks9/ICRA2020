@@ -199,6 +199,8 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 	allFirstCatches = []; 
 	#run individual sims
 	for count in range(0,sims):
+		initialize(); 
+		numActs = 4; 
 		np.random.seed(count+238987); 
 		print("Simulation: {} of {}".format(count+1,sims)); 
 		
@@ -250,7 +252,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 
 			if(sum(dataPackage['Data'][count]['Rewards']) == 0 and r!=0):
 				allFirstCatches.append(step); 
-				
+
 			#print(act,numActs,len(allSketches));
 			#dirs = ['near','east','west','north','south']
 			#print(dirs[(act-4)%5],(act-4)//5,o); 
@@ -308,6 +310,9 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 				plt.pause(0.001)
 
 				plt.cla();
+
+
+
 
 		if(sum(dataPackage['Data'][count]['Rewards']) == 0):
 			allFirstCatches.append(100); 

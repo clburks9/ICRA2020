@@ -38,8 +38,15 @@ def initialize():
 	speedMap = np.flip(speedMap,0); 
 	speedMap = np.transpose(speedMap)
 	useMap = np.ones(shape=speedMap.shape); 
+	global allSketches
+	allSketches = []; 
 	# plt.imshow(speedMap,origin='lower'); 
 	# plt.show();
+	global numActs
+	global numObs
+	numActs = 4; 
+	numObs = 2; 
+	
 
 
 def addSketch(p):
@@ -51,9 +58,9 @@ def addSketch(p):
 	# numActs += 5; 
 	allSketches.append(p); 
 
-	for i in range(-150+int(p[0]),150+int(p[0])):
+	for i in range(-200+int(p[0]),200+int(p[0])):
 		if(i>=0 and i<bounds[0]):
-			for j in range(-150+int(p[0]),150+int(p[0])):
+			for j in range(-200+int(p[0]),200+int(p[0])):
 				if(j>=0 and j<bounds[1]):
 					useMap[i,j] = speedMap[i,j]; 
 
