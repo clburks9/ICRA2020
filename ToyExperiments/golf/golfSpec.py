@@ -9,14 +9,14 @@ from softmaxModels import Softmax
 numActs= 4;
 numObs = 2;  
 gamma = .95; 
-maxTime = 1;
+maxTime = 2;
 maxDepth = 15;
 c=1;
 maxTreeQueries = 10000; 
 problemName = 'GolfMMS'
 agentSpeed = 50; 
-targetMaxSpeed = 25; 
-targetNoise = 10; 
+targetMaxSpeed = 15; 
+targetNoise = 5; 
 
 bounds = [828-1,828-1]; 
 

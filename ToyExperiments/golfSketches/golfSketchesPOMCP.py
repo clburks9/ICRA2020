@@ -198,7 +198,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 	allFirstCatches = []; 
 	#run individual sims
 	for count in range(0,sims):
-		np.random.seed(count+120243123); 
+		np.random.seed(count+238987); 
 		print("Simulation: {} of {}".format(count+1,sims)); 
 		
 		#Make Problem
@@ -233,7 +233,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 
 		for step in range(0,steps): 
 
-			if(step%20 == 1):
+			if(step%10 == 1):
 				tmp = np.random.choice([i for i in range(0,len(potentialSketches))],p=sketchProbs); 
 				addSketch(potentialSketches[tmp]);
 				#numActs+=5; 
@@ -307,6 +307,9 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 				plt.pause(0.001)
 
 				plt.cla();
+
+		if(sum(dataPackage['Data'][count]['Rewards']) == 0):
+			allFirstCatches.append(100); 
 
 		print("First Capture: {}".format(allFirstCatches[-1])); 
 		print("Accumlated Reward: {}".format(sum(dataPackage['Data'][count]['Rewards'])));
