@@ -198,6 +198,8 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 	allFirstCatches = []; 
 	#run individual sims
 	for count in range(0,sims):
+		initialize(); 
+		numActs = 4; 
 		np.random.seed(count+238987); 
 		print("Simulation: {} of {}".format(count+1,sims)); 
 		
