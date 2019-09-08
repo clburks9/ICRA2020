@@ -159,7 +159,7 @@ def generate_r(s,a):
 		else:
 			return 0;
 	else:
-		return 0; 
+		return 0.1; 
 
 	#return max(100,1/dist(s)); 
 
