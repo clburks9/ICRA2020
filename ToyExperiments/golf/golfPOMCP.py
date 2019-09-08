@@ -53,8 +53,8 @@ class POMCP:
 		#else recurse 
 		if(o not in h[act].getChildrenIDs()):
 			h[act].addChildID(o); 
-			return estimate_value(s,h[act]); 
-			#return rollout(s,depth); 
+			#return estimate_value(s,h[act]); 
+			return rollout(s,depth); 
 		
 		if(isTerminal(s,act)):
 			return r
@@ -186,7 +186,7 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 
 	#run individual sims
 	for count in range(0,sims):
-		np.random.seed(count+120243123); 
+		np.random.seed(count+238987);  
 		print("Simulation: {} of {}".format(count+1,sims)); 
 		
 		#Make Problem
@@ -273,8 +273,8 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 
 				plt.cla();
 
-		#if(sum(dataPackage['Data'][count]['Rewards']) == 0):
-			#allFirstCatches.append(-1); 
+		if(sum(dataPackage['Data'][count]['Rewards']) == 0):
+			allFirstCatches.append(100); 
 		print("First Capture: {}".format(allFirstCatches[-1])); 
 		print("Accumlated Reward: {}".format(sum(dataPackage['Data'][count]['Rewards'])));
 		print("Average Final Reward: {}".format(sum([sum(dataPackage['Data'][i]['Rewards']) for i in range(0,count+1)])/(count+1)));

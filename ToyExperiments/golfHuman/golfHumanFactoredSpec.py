@@ -8,15 +8,15 @@ from PIL import Image
 
 numActs= 4;
 numObs = 2;  
-gamma = .9; 
-maxTime = 1;
-maxDepth = 25;
-c=5;
+gamma = .95; 
+maxTime = 2;
+maxDepth = 15;
+c=1;
 maxTreeQueries = 10000; 
 problemName = 'GolfHumanFactored'
 agentSpeed = 50; 
-targetMaxSpeed = 35; 
-targetNoise = 10; 
+targetMaxSpeed = 15; 
+targetNoise = 5; 
 allSketches = []; 
 availability = 0.95; 
 accuracy = .95;

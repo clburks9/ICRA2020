@@ -196,10 +196,11 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 	sketchProbs = np.ones(shape=(len(potentialSketches))); 
 	sketchProbs /= sum(sketchProbs); 
 
+	allFirstCatches = []; 
 
 	#run individual sims
 	for count in range(0,sims):
-		np.random.seed(count+120244); 
+		np.random.seed(count+238987);  
 		print("Simulation: {} of {}".format(count+1,sims)); 
 		
 		#Make Problem
@@ -247,10 +248,11 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 			r = max(0,generate_r(trueS,act));
 			o = generate_o(trueS,act); 
 
+			if(sum(dataPackage['Data'][count]['Rewards']) == 0 and r!=0):
+				allFirstCatches.append(step); 
 
 
-
-			print(act,(act-4)//4);
+			#print(act,(act-4)//4);
 			#dirs = ['near','east','west','north','south']
 			#print(dirs[(act-4)%5],(act-4)//5,o); 
 			#print(trueS[0],trueS[1]); 
@@ -308,10 +310,15 @@ def runSims(sims = 10,steps = 10,verbosity = 1,simIdent = 'Test',vis=False):
 
 				plt.cla();
 
+		if(sum(dataPackage['Data'][count]['Rewards']) == 0):
+			allFirstCatches.append(100); 
+
+		print("First Capture: {}".format(allFirstCatches[-1])); 
 		print("Accumlated Reward: {}".format(sum(dataPackage['Data'][count]['Rewards'])));
 		print("Average Final Reward: {}".format(sum([sum(dataPackage['Data'][i]['Rewards']) for i in range(0,count+1)])/(count+1)));
+		print("Average First Capture: {}".format(np.mean(allFirstCatches))); 
 		print(""); 
-		np.save('../../data/dataGolfHumanFactored_E1_{}'.format(simIdent),dataPackage)
+		np.save('../../data/dataGolfHumanDirs_E1_{}'.format(simIdent),dataPackage)
 
 	#save all data
 

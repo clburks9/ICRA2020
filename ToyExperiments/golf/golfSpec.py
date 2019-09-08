@@ -9,14 +9,14 @@ from softmaxModels import Softmax
 numActs= 4;
 numObs = 2;  
 gamma = .95; 
-maxTime = 1;
-maxDepth = 25;
+maxTime = 2;
+maxDepth = 15;
 c=1;
 maxTreeQueries = 10000; 
 problemName = 'GolfMMS'
 agentSpeed = 50; 
-targetMaxSpeed = 25; 
-targetNoise = 10; 
+targetMaxSpeed = 15; 
+targetNoise = 5; 
 
 bounds = [828-1,828-1]; 
 
@@ -29,7 +29,7 @@ def initialize():
 
 	global speedMap
 	global useMap
-	speedMap = ((speedImg[:,:,1] - .5*speedImg[:,:,0])/255 + 1.1); 
+	speedMap = ((speedImg[:,:,1] - .5*speedImg[:,:,0])/255 + 1.05); 
 	
 	speedMap = np.flip(speedMap,0); 
 	speedMap = np.transpose(speedMap)
