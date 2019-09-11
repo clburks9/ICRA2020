@@ -6,17 +6,24 @@ sys.path.append("../src");
 from softmaxModels import Softmax
 
 
-numActs= 6;
-numObs = 4;  
-gamma = .9; 
-maxTime = .25;
-maxDepth = 25;
+numActs= 8;
+numObs = 3;  
+gamma = .95; 
+maxTime = 2;
+maxDepth = 15;
 c=1;
-maxTreeQueries = 1000; 
+maxTreeQueries = 2000; 
 agentSpeed = 1; 
 problemName = 'MQuestGrid'
-
+targetMaxSpeed = 0.25; 
+targetNoise = 0.15; 
 network = None;
+leaveRoadChance = 0.05; 
+
+availability = 0.95; 
+accuracy = .95;
+
+bounds = [8,8]; 
 
 #Alright, let's do a 2D search problem
 #2 Robots, each moving in 2D
@@ -36,10 +43,12 @@ def setNetworkNodes(net):
 	network = net; 
 
 
-def generate_s(s,a):
+def generate_s(s,act):
 
-	speed = 0.25; 
-	dev = 0.15; 
+	a = act%4; 
+
+	speed = targetMaxSpeed; 
+	dev = targetNoise; 
 
 	sprime = deepcopy(s); 
 
@@ -81,8 +90,8 @@ def generate_s(s,a):
 		#sprime[2] += (g[0]-c[0])*speed/2 + np.random.normal(0,dev); 
 		#sprime[3] += (g[1]-c[1])*speed/2 + np.random.normal(0,dev); 
 
-		sprime[2] += (speed/2)*(g[0]-c[0])/distance(c,g); 
-		sprime[3] += (speed/2)*(g[1]-c[1])/distance(c,g); 
+		sprime[2] += (speed/2)*(g[0]-c[0])/distance(c,g) + np.random.normal(0,dev); 
+		sprime[3] += (speed/2)*(g[1]-c[1])/distance(c,g) + np.random.normal(0,dev); 
 
 
 	#if point has reached goal choose new goal
@@ -119,8 +128,9 @@ def generate_s(s,a):
 	elif(a == 3):
 		sprime[1] -= agentSpeed
 
-	sprime[0] = min(10,max(0,sprime[0]));
-	sprime[1] = min(10,max(0,sprime[1]));
+	sprime[0] = min(bounds[0],max(0,sprime[0]));
+	sprime[1] = min(bounds[1],max(0,sprime[1]));
+	
 	
 
 	return sprime; 
@@ -136,79 +146,51 @@ def distance(a,b):
 
 def generate_r(s,a):
 
-	numHumanQuestions = 10; 
-
-
-	mod = 0; 
-	if(a>3):
-		mod = 1/numHumanQuestions; 
 
 	if(dist(s) < 0.5):
-		return 1-mod; 
+		return 1; 
 	else:
-		return 0-mod; 
+		return 0.01;  
 
 
 def generate_o(s,a):
 
-	#human observation likelihood
-	humanLike = .02; 
-
-	if(a == 4):
-		#asked 0
-		coin = np.random.random(); 
-		if(s[6] == 0 and coin > humanLike):
-			return 'Yes'; 
-		elif(s[6] == 0 and coin < humanLike):
-			return 'No'; 
-		elif(s[6] != 0 and coin > humanLike):
-			return 'No';
-		elif(s[6] != 0 and coin < humanLike):
-			return 'Yes'
-	elif(a==5):
-		#asked 1
-		coin = np.random.random(); 
-		if(s[6] == 1 and coin > humanLike):
-			return 'Yes'; 
-		elif(s[6] == 1 and coin < humanLike):
-			return 'No'; 
-		elif(s[6] != 1 and coin > humanLike):
-			return 'No';
-		elif(s[6] != 1 and coin < humanLike):
-			return 'Yes'
 
 
-	#flip coin for noise
+
 	coin = np.random.random(); 
-	if(coin < 0.01):
-		return np.random.choice(['Near','Far'])
+	flipped = .02; 
 
-
-
-	elif(dist(s) > 1):
-		return 'Far'; 
+	if(dist(s) > 1 and a<4):
+		if(coin>flipped):
+			return 'Far';
+		else:
+			return 'Near' 
+	elif(dist(s) > .5 and dist(s)<1):
+		if(coin>flipped):
+			return 'Near'
+		else:
+			return np.random.choice(['Far','Caught']);
+	elif(dist(s) < .5):
+		if(coin > flipped):
+			return 'Caught'
+		else:
+			return 'Near'
 	else:
-		return 'Near'; 
-
-	# coin = np.random.random(); 
-	# if(coin < 0.02):
-	# 	return np.random.choice(['Near','East','West','North','South'])
+		coin = np.random.random(); 
+		if(coin < 1-availability):
+			return 'None';
 
 
-	# if(dist(s) < 1):
-	# 	return 'Near'; 
+		coin = np.random.random(); 
+		flipped = 1-accuracy; 
 
-	# di = [s[2]-s[0],s[3]-s[1]]; 
-	# if(abs(di[0]) > abs(di[1])):
-	# 	if(di[0] > 0):
-	# 		return 'East'
-	# 	else:
-	# 		return 'West'
-	# else:
-	# 	if(di[1] > 0):
-	# 		return 'North'
-	# 	else:
-	# 		return 'South'
+		if(s[6] == 0):
+			toRet = 'Yes' if coin > flipped else 'No'
+		else:
+			toRet = 'No' if coin > flipped else 'Yes'
+		return toRet; 
+
 
 def estimate_value(s,h):
 	#how far can you get in the depth left
@@ -220,20 +202,66 @@ def rollout(s,depth):
 	if(depth <= 0):
 		return 0; 
 	else:
-		#random action
-		a = np.random.randint(0,numActs)
-		sprime = generate_s(s,a,0); 
+		#greedy action
+		a = 0; 
+		di = [s[2]-s[0],s[3]-s[1]]; 
+		if(np.sqrt(di[0]**2 + di[1]**2) < 1):
+			a=4
+		if(abs(di[0]) > abs(di[1])):
+			if(di[0] > 0):
+				a=1; 
+			else:
+				a=0;
+		else:
+			if(di[1] > 0):
+				a=2;
+			else:
+				a=3
+
+		sprime = generate_s(s,a); 
 		r = generate_r(s,a); 
-		return r + gamma*rollout(sprime,a)
+		return r + gamma*rollout(sprime,depth-1)
 
 
 def isTerminal(s,act):
-	if(dist(s) < 1):
-		return True; 
+	# if(dist(s) < 0.5):
+	# 	return True; 
+	# else:
+	# 	return False 
+	return False
+
+
+
+def obs_weight(s,a,o):
+	upWeight = 0.98; 
+	downWeight = 0.02; 
+
+	if(dist(s) > 1 and a<4):
+		if(o=='Far'):
+			return upWeight;
+		else:
+			return downWeight 
+	elif(dist(s) > .5 and dist(s)<1):
+		if(o=='Near'):
+			return upWeight; 
+		else:
+			return downWeight; 
+	elif(dist(s)<.5):
+		if(o=='Caught'):
+			return upWeight
+		else:
+			return downWeight
 	else:
-		return False 
+		if(o=='None'):
+			return 1-availability; 
 
-
+		upWeight = accuracy; 
+		downWeight = 1-accuracy; 
+		if(s[6] == 0):
+			toRet = upWeight if o=='Yes' else downWeight
+		else:
+			toRet = upWeight if o=='No' else downWeight
+		return toRet; 
 
 
 

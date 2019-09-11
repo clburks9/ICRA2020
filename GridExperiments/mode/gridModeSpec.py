@@ -6,18 +6,21 @@ sys.path.append("../src");
 from softmaxModels import Softmax
 
 
-numActs= 5;
-numObs = 2;  
-gamma = .9; 
-maxTime = .25;
-maxDepth = 25;
+numActs= 4;
+numObs = 3;  
+gamma = .95; 
+maxTime = 2;
+maxDepth = 15;
 c=1;
-maxTreeQueries = 1000; 
+maxTreeQueries = 2000; 
 agentSpeed = 1; 
 problemName = 'ModeGrid'
-
+leaveRoadChance = 0.05; 
+targetMaxSpeed = 0.25; 
+targetNoise = 0.15; 
 network = None;
 
+bounds = [8,8]; 
 #Alright, let's do a 2D search problem
 #2 Robots, each moving in 2D
 #The cop robot moves freely, while the 
@@ -38,8 +41,8 @@ def setNetworkNodes(net):
 
 def generate_s(s,a):
 
-	speed = 0.25; 
-	dev = 0.15; 
+	speed = targetMaxSpeed; 
+	dev = targetNoise; 
 
 	sprime = deepcopy(s); 
 
@@ -50,7 +53,7 @@ def generate_s(s,a):
 	mode = sprime[6]; 
 
 
-	leaveRoadChance = .05; 
+	
 	#if mode is 0, check for mode transition
 	if(sprime[6] == 0):
 		coin = np.random.random(); 
@@ -81,8 +84,8 @@ def generate_s(s,a):
 		#sprime[2] += (g[0]-c[0])*speed/2 + np.random.normal(0,dev); 
 		#sprime[3] += (g[1]-c[1])*speed/2 + np.random.normal(0,dev); 
 
-		sprime[2] += (speed/2)*(g[0]-c[0])/distance(c,g); 
-		sprime[3] += (speed/2)*(g[1]-c[1])/distance(c,g); 
+		sprime[2] += (speed/2)*(g[0]-c[0])/distance(c,g) + np.random.normal(0,dev); 
+		sprime[3] += (speed/2)*(g[1]-c[1])/distance(c,g) + np.random.normal(0,dev); 
 
 
 	#if point has reached goal choose new goal
@@ -119,8 +122,8 @@ def generate_s(s,a):
 	elif(a == 3):
 		sprime[1] -= agentSpeed
 
-	sprime[0] = min(10,max(0,sprime[0]));
-	sprime[1] = min(10,max(0,sprime[1]));
+	sprime[0] = min(bounds[0],max(0,sprime[0]));
+	sprime[1] = min(bounds[1],max(0,sprime[1]));
 	
 
 	return sprime; 
@@ -136,53 +139,37 @@ def distance(a,b):
 
 def generate_r(s,a):
 
-	numHumanQuestions = 10; 
-
-
-	mod = 0; 
-	if(a>4):
-		mod = 1/numHumanQuestions; 
 
 	if(dist(s) < 0.5):
-		return 1-mod; 
+		return 1; 
 	else:
-		return 0-mod; 
+		return 0.01; 
 
 def generate_o(s,a):
 
 
 
-	#flip coin for noise
+
 	coin = np.random.random(); 
-	if(coin < 0.01):
-		return np.random.choice(['Near','Far'])
+	flipped = .02; 
+
+	if(dist(s) > 1):
+		if(coin>flipped):
+			return 'Far';
+		else:
+			return 'Near' 
+	elif(dist(s) > .5 and dist(s)<1):
+		if(coin>flipped):
+			return 'Near'
+		else:
+			return np.random.choice(['Far','Caught']);
+	elif(dist(s) < .5):
+		if(coin > flipped):
+			return 'Caught'
+		else:
+			return 'Near'
 
 
-
-	elif(dist(s) > 1):
-		return 'Far'; 
-	else:
-		return 'Near'; 
-
-	# coin = np.random.random(); 
-	# if(coin < 0.02):
-	# 	return np.random.choice(['Near','East','West','North','South'])
-
-
-	# if(dist(s) < 1):
-	# 	return 'Near'; 
-
-	# di = [s[2]-s[0],s[3]-s[1]]; 
-	# if(abs(di[0]) > abs(di[1])):
-	# 	if(di[0] > 0):
-	# 		return 'East'
-	# 	else:
-	# 		return 'West'
-	# else:
-	# 	if(di[1] > 0):
-	# 		return 'North'
-	# 	else:
-	# 		return 'South'
 
 def estimate_value(s,h):
 	#how far can you get in the depth left
@@ -194,18 +181,55 @@ def rollout(s,depth):
 	if(depth <= 0):
 		return 0; 
 	else:
-		#random action
-		a = np.random.randint(0,numActs)
-		sprime = generate_s(s,a,0); 
+		#greedy action
+		a = 0; 
+		di = [s[2]-s[0],s[3]-s[1]]; 
+		if(np.sqrt(di[0]**2 + di[1]**2) < 1):
+			a=4
+		if(abs(di[0]) > abs(di[1])):
+			if(di[0] > 0):
+				a=1; 
+			else:
+				a=0;
+		else:
+			if(di[1] > 0):
+				a=2;
+			else:
+				a=3
+
+		sprime = generate_s(s,a); 
 		r = generate_r(s,a); 
-		return r + gamma*rollout(sprime,a)
+		return r + gamma*rollout(sprime,depth-1)
 
 
 def isTerminal(s,act):
-	if(dist(s) < 1):
-		return True; 
+	# if(dist(s) < 0.5):
+	# 	return True; 
+	# else:
+	# 	return False 
+	return False
+
+
+
+def obs_weight(s,a,o):
+	upWeight = 0.98; 
+	downWeight = 0.02; 
+
+	if(dist(s) > 1):
+		if(o=='Far'):
+			return upWeight;
+		else:
+			return downWeight 
+	elif(dist(s) > .5 and dist(s)<1):
+		if(o=='Near'):
+			return upWeight; 
+		else:
+			return downWeight; 
 	else:
-		return False 
+		if(o=='Caught'):
+			return upWeight
+		else:
+			return downWeight
 
 
 

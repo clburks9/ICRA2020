@@ -56,8 +56,8 @@ class POMCP:
 		#else recurse 
 		if(o not in h[act].getChildrenIDs()):
 			h[act].addChildID(o); 
-			return estimate_value(s,h[act]); 
-			#return rollout(s,depth); 
+			#return estimate_value(s,h[act]); 
+			return rollout(s,depth); 
 		
 		if(isTerminal(s,act)):
 			return r
@@ -164,25 +164,10 @@ def propogateAndMeasure(sSet,act,o):
 	origLen = len(sSetPrime); 
 
 	s = np.array(sSetPrime); 
-	#sm = Softmax(); 
-	#sm.buildOrientedRecModel([sSetPrime[0][0],sSetPrime[0][1]],0,1,1,steepness=7);
-
-	#measurements = ['Near','West','South','North','East']
-	#weights = [sm.pointEvalND(measurements.index(o),[s[i][2],s[i][3]]) for i in range(0,len(s))]; 
+	
 	weights = [0 for i in range(0,len(s))]; 
-	upWeight = .99; 
-	downWeight = .01; 
 	for i in range(0,len(s)):
-		if(distance([s[i][0],s[i][1]],[s[i][2],s[i][3]]) < 1):
-			if(o == 'Near'):
-				weights[i] = upWeight; 
-			else:
-				weights[i] = downWeight; 
-		elif(distance([s[i][0],s[i][1]],[s[i][2],s[i][3]]) >= 1):
-			if(o == 'Far'):
-				weights[i] = upWeight; 
-			else:
-				weights[i] = downWeight; 
+		weights[i] = obs_weight(s[i],act,o); 
 		
 
 	weights /= np.sum(weights); 
@@ -198,192 +183,26 @@ def propogateAndMeasure(sSet,act,o):
 
 	return s
 
-def simForward(steps = 10):
-	#Make problem
-	h = Node(); 
-	solver = POMCP(); 
 
-	#make belief
-
-	network = readInNetwork('../common/flyovertonNetwork.yaml')
-	setNetworkNodes(network); 
-	target,curs,goals = populatePoints(network,maxTreeQueries); 
-	pickInd = np.random.randint(0,len(target)); 
-	trueS = [np.random.random()*8,np.random.random()*8,target[pickInd][0],target[pickInd][1],curs[pickInd],goals[pickInd],0]; 
-
-	sSet = []; 
-	for i in range(0,len(target)):
-		sSet.append([trueS[0],trueS[1],target[i][0],target[i][1],curs[i],goals[i],0]); 
-
-	# trueX = np.random.random()*10; 
-	# trueY = np.random.random()*10; 
-	# sSet = []; 
-	# for i in range(0,maxTreeQueries):
-	# 	sSet.append([trueX,trueY,np.random.random()*10,np.random.random()*10,np.random.choice([0,1,2]),np.random.choice([-1,1])]); 
-
-	# trueS = sSet[np.random.choice([0,len(sSet)-1])]; 
-
-
-
-	fig,ax1 = plt.subplots(); 
-	plotFudge = 20; 
-	allPrevs = np.zeros(shape=(steps,6)).tolist(); 
-	allRewards = []; 
-	allMeans = np.zeros(shape = (steps,2)); 
-	allVars = np.zeros(shape = (steps,2)); 
-
-	#fig,ax1 = displayNetworkMap('flyovertonNetwork.yaml',fig=fig,ax=ax1,vis=False); 
-	#plt.show()
-
-	#get action
-	for step in range(0,steps):
-		fig,ax1 = displayNetworkMap('../common/flyovertonNetwork.yaml',fig,ax1,False,redraw=True);
-
-		allPrevs[step] = trueS; 
-		act = solver.search(sSet,h,False);
-
-		r = generate_r(trueS,act);  
-		trueS = generate_s(trueS,act); 
-		o = generate_o(trueS,act); 
-
-		allRewards.append(r); 
-
-
-
-		tmpHAct = h.getChildByID(act); 
-		tmpHObs = tmpHAct.getChildByID(o); 
-		#tmpBel = np.array(h.data); 
-		
-
-		if(tmpHObs != -1 and len(tmpHObs.data) > 0):
-			h = tmpHObs; 
-			#sSet = solver.resampleNode(h); 
-		else:
-			#h = np.random.choice(h.children);
-			# print(h); 
-			# print("State: {}".format(trueS));
-			# print("Action: {}".format(act)); 
-			# print("Observation: {}".format(o)); 
-			# raise("Error: Child Node not Found!!!")
-			h = tmpHAct[0]; 
-			print("Error: Child Node Not Found!!!"); 
-			
-		sSet = propogateAndMeasure(sSet,act,o); 
-		sSet = solver.resampleSet(sSet); 
-
-		tmpBel = np.array(sSet); 
-		
-		allMeans[step] = [np.mean(tmpBel[:,2]),np.mean(tmpBel[:,3])];
-		allVars[step] =  [np.std(tmpBel[:,2]),np.std(tmpBel[:,3])]; 
-
-		ax2 = fig.add_subplot(111,label='belief'); 
-		sp=[tmpBel[:,2],tmpBel[:,3]];
-		
-		#ax2.hist2d(sp[0],sp[1],bins=40,range=[[-.2,8.2],[-.2,8.2]],cmin=1,cmap='Reds',zorder=2);
-		ax2.scatter(sp[0],sp[1],c='k',zorder=2);
-		#ax2.scatter(sp[0],sp[1],c='k',zorder=2);
-		ax2.set_xlim([-0.2,8.2]); 
-		ax2.set_ylim([-0.2,8.2]);
-
-		ax2.scatter(allPrevs[step][0],allPrevs[step][1],c=[0,0,1],zorder = 3); 
-		ax2.scatter(allPrevs[step][2],allPrevs[step][3],c=[1,0,0],zorder = 3); 
-		ax2.arrow(allPrevs[step][0],allPrevs[step][1],trueS[0]-allPrevs[step][0],trueS[1]-allPrevs[step][1],edgecolor=[0,0,1],head_width = 0.25,facecolor =[0,0,.5],zorder=3); 
-		ax2.arrow(allPrevs[step][2],allPrevs[step][3],trueS[2]-allPrevs[step][2],trueS[3]-allPrevs[step][3],edgecolor=[1,0,0],head_width = 0.25,facecolor = [.5,0,0],zorder=3); 
-		
-		ax1.set_xlim([-0.2,8.2]); 
-		ax1.set_ylim([-0.2,8.2]); 
-		plt.axis('off')
-		ax1.axis('off')
-		ax2.axis('off')
-		plt.axis('off')
-		#plt.colorbar() 
-		plt.pause(0.01);
-		#plt.show();
-		#ax2.clear(); 
-		
-
-		print("Step: {} of {}".format(step+1,steps))
-		print("State: {}".format(trueS));
-		print("Action: {}".format(act)); 
-		print("Observation: {}".format(o)); 
-		#print("Distance: {0:.2f}".format(dist(trueS)))
-		print("Ac Reward: {}".format(sum(allRewards))); 
-		print("Belief Mean: {0:.2f},{0:.2f}".format(np.mean(tmpBel[:,2]),np.mean(tmpBel[:,3]))); 
-		print("Belief Length: {}".format(len(tmpBel)))
-		print(""); 
-		#print(info)
-
-		if(isTerminal(trueS,act)):
-			print("Captured after: {} steps".format(step)); 
-			break; 
-		ax2.remove();
-
-
-		#ax.scatter(trueS[0],trueS[1],c=[0,0,1,((step+plotFudge)/(steps+plotFudge))]); 
-		#ax.scatter(trueS[2],trueS[3],c=[0,1,0,((step+plotFudge)/(steps+plotFudge))]); 
-		# ax.scatter(tmpBel[:,2],tmpBel[:,3],c=[1,0,0,0.25],marker='*',s=2)
-		# ax.scatter(allPrevs[step][0],allPrevs[step][1],c=[0,0,1]); 
-		# ax.scatter(allPrevs[step][2],allPrevs[step][3],c=[0,1,0]); 
-		# ax.arrow(allPrevs[step][0],allPrevs[step][1],trueS[0]-allPrevs[step][0],trueS[1]-allPrevs[step][1],edgecolor=[0,0,1],head_width = 0.25,facecolor =[0,0,.5]); 
-		# ax.arrow(allPrevs[step][2],allPrevs[step][3],trueS[2]-allPrevs[step][2],trueS[3]-allPrevs[step][3],edgecolor=[0,1,0],head_width = 0.25,facecolor = [0,.5,0]); 
-		
-
-		# allC = np.zeros(shape=(step,4)); 
-		# allC[:,2] = 1; 
-		# for i in range(0,len(allC)):
-		# 	allC[i,3] = .6*(i/len(allC)) 
-
-		# ax.scatter(allPrevs[:,0],allPrevs[:,1],c=allC)
-		 
-		
-	# 	plt.xlim([-0.5,10.5]); 
-	# 	plt.ylim([-0.5,10.5]); 
-	# 	plt.pause(0.001)
-
-	# 	plt.cla();
-
-	# plt.clf(); 
-	#plt.pause(2);
-
-	#print("Final Accumlated Reward after {} steps: {}".format(steps,sum(allRewards))); 
-	fig,axarr = plt.subplots(2); 
-	x = range(0,steps); 
-	allPrevs = np.array(allPrevs); 
-
-	axarr[0].plot(allMeans[:,0],c='g');
-	axarr[0].plot(allMeans[:,0] + 2*allVars[:,0],c='g',linestyle='--')
-	axarr[0].plot(allMeans[:,0] - 2*allVars[:,0],c='g',linestyle='--')
-	axarr[0].plot(allPrevs[:,2],c='k',linestyle='--')
-	axarr[0].fill_between(x,allMeans[:,0] - 2*allVars[:,0],allMeans[:,0] + 2*allVars[:,0],alpha=0.25,color='g')
-	axarr[0].set_ylim([-0.5,10.5]); 
-	axarr[0].set_ylabel('North Estimate')
-
-	axarr[1].plot(allMeans[:,1],c='g');
-	axarr[1].plot(allMeans[:,1] + 2*allVars[:,1],c='g',linestyle='--')
-	axarr[1].plot(allMeans[:,1] - 2*allVars[:,1],c='g',linestyle='--')
-	axarr[1].plot(allPrevs[:,3],c='k',linestyle='--')
-	axarr[1].fill_between(x,allMeans[:,1] - 2*allVars[:,1],allMeans[:,1] + 2*allVars[:,1],alpha=0.25,color='g')
-	axarr[1].set_ylim([-0.5,10.5]); 
-	axarr[1].set_ylabel('East Estimate')
-	fig.suptitle("Estimates with 2 sigma bounds when caught at: {}".format(step)); 
-
-
-
-
-
-	plt.show()
+def correctAgentLoc(trueS,sSet):
+	for s in sSet:
+		s[0] = trueS[0]; 
+		s[1] = trueS[1]; 
 
 
 def runSims(sims = 10,steps = 10,verbosity = 2,simIdent = 'Test'):
 
 	#set up data collection
-	dataPackage = {'Meta':{'NumActs':numActs,'maxDepth':maxDepth,'c':c,'maxTreeQueries':maxTreeQueries,'maxTime':maxTime,'gamma':gamma,'numObs':numObs,'problemName':problemName,'agentSpeed':agentSpeed},'Data':[]}
+	dataPackage = {'Meta':{'NumActs':numActs,'maxDepth':maxDepth,'c':c,'maxTreeQueries':maxTreeQueries,'maxTime':maxTime,'gamma':gamma,'numObs':numObs,'problemName':problemName,'agentSpeed':agentSpeed,'targetMaxSpeed':targetMaxSpeed,'targetNoise':targetNoise,'leaveRoadChance':leaveRoadChance},'Data':[]}
 	for i in range(0,sims):
-		dataPackage['Data'].append({'Beliefs':[],'ModeBels':[],'States':[],'Actions':[],'Observations':[],'Rewards':[],'TreeInfo':[]}); 
+		dataPackage['Data'].append({'ModeBels':[],'Beliefs':[],'States':[],'Actions':[],'Observations':[],'Rewards':[],'TreeInfo':[]});
 
 	if(verbosity >= 1):
 		print("Starting Data Collection Run: {}".format(simIdent)); 
 		print("Running {} simulations of {} steps each".format(sims,steps))
+	
+	allFirstCatches = []; 
+
 	#run individual sims
 	for count in range(0,sims):
 		if(verbosity >= 2):
@@ -418,6 +237,8 @@ def runSims(sims = 10,steps = 10,verbosity = 2,simIdent = 'Test'):
 		dataPackage['Data'][count]['States'].append(trueS); 
 		if(verbosity >= 4):
 			fig,ax1 = plt.subplots(); 
+		
+
 		for step in range(0,steps):
 			if(verbosity>=3):
 				print("Step: {}".format(step));  
@@ -427,22 +248,39 @@ def runSims(sims = 10,steps = 10,verbosity = 2,simIdent = 'Test'):
 
 			act,info = solver.search(sSet,h,depth = min(maxDepth,steps-step+1),inform=True);
 
+
+
 			trueS = generate_s(trueS,act); 
-			r = generate_r(trueS,act);
+			r = max(0,generate_r(trueS,act));
 			o = generate_o(trueS,act); 
+
+			#print(act,o);
+			#print(trueS,o);
+
+			if(sum(dataPackage['Data'][count]['Rewards']) == 0 and r!=0):
+				allFirstCatches.append(step); 
+
+			# if(verbosity>=3):
+			# 	if(act > 3):
+			# 		actMap = {4:'Is the Target on the Road?',5:'Is the Target off-road?'}
+			# 		print("Action: {}".format(actMap[act]));
+			# 		print("Observation: {}".format(o)); 
+			# 		print("");
 
 			tmpHAct = h.getChildByID(act); 
 			tmpHObs = tmpHAct.getChildByID(o); 
 
-			if(tmpHObs != -1 and len(tmpHObs.data) > 0):
-				h = tmpHObs; 
-				#sSet = solver.resampleNode(h); 
-			else:
-				h = tmpHAct[0]; 
-				#print("Error: Child Node Not Found!!!"); 
+			# if(tmpHObs != -1 and len(tmpHObs.data) > 0):
+			# 	h = tmpHObs; 
+			# 	#sSet = solver.resampleNode(h); 
+			# else:
+			# 	h = tmpHAct[0]; 
+			# 	#print("Error: Child Node Not Found!!!"); 
 
+			h = Node(); 
 			sSet = propogateAndMeasure(sSet,act,o); 
-			sSet = solver.resampleSet(sSet); 
+			correctAgentLoc(trueS,sSet); 
+			#sSet = solver.resampleSet(sSet); 
 
 			tmpBel = np.array(sSet); 
 			#print(len(tmpBel)); 
@@ -458,13 +296,13 @@ def runSims(sims = 10,steps = 10,verbosity = 2,simIdent = 'Test'):
 				sp=[tmpBel[:,2],tmpBel[:,3]];
 				
 				#ax2.hist2d(sp[0],sp[1],bins=40,range=[[-.2,8.2],[-.2,8.2]],cmin=1,cmap='Reds',zorder=2);
-				ax2.scatter(sp[0],sp[1],c='k',zorder=2);
+				ax2.scatter(sp[0],sp[1],c='r',zorder=2,marker='*',s=2);
 				#ax2.scatter(sp[0],sp[1],c='k',zorder=2);
 				ax2.set_xlim([-0.2,8.2]); 
 				ax2.set_ylim([-0.2,8.2]);
 
 				ax2.scatter(trueS[0],trueS[1],c=[0,0,1],zorder = 3); 
-				ax2.scatter(trueS[2],trueS[3],c=[1,0,0],zorder = 3); 
+				ax2.scatter(trueS[2],trueS[3],c=[1,0,0],zorder = 3,edgecolor='black'); 
 				#ax2.arrow(trueS[0],trueS[1],trueS[0]-trueS[0],trueS[1]-trueS[1],edgecolor=[0,0,1],head_width = 0.25,facecolor =[0,0,.5],zorder=3); 
 				#ax2.arrow(trueS[2],trueS[3],trueS[2]-trueS[2],trueS[3]-trueS[3],edgecolor=[1,0,0],head_width = 0.25,facecolor = [.5,0,0],zorder=3); 
 				
@@ -487,19 +325,17 @@ def runSims(sims = 10,steps = 10,verbosity = 2,simIdent = 'Test'):
 			dataPackage['Data'][count]['TreeInfo'].append(info);
 			dataPackage['Data'][count]['ModeBels'].append(modeBels); 
 			
-			if(isTerminal(trueS,act)):
-				#print(trueS); 
-				if(verbosity >= 2):
-					print("Captured after: {} steps".format(step)); 
-				break; 
+			# if(isTerminal(trueS,act)):
+			# 	#print(trueS); 
+			# 	if(verbosity >= 2):
+			# 		print("Captured after: {} steps".format(step)); 
+			# 	break; 
 
 
-		print("Capture Time: {}".format(len(dataPackage['Data'][count]['Rewards'])-1));
-		print("Average Capture Time: {}".format(sum([len(dataPackage['Data'][i]['Rewards'])-1 for i in range(0,count+1)])/(count+1)));
+		print("Capture Time: {}".format(allFirstCatches[-1])); 
+		print("Average Capture Time: {}".format(np.mean(allFirstCatches))); 
 		print(""); 
 		np.save('../../data/dataGridMode_E2_{}'.format(simIdent),dataPackage)
-
-	#save all data
 
 
 
