@@ -169,6 +169,8 @@ def runSims(sims = 10,steps = 10,verbosity = 2,simIdent = 'Test'):
 	
 	allFirstCatches = []; 
 
+	np.random.seed(234234); 
+
 	#run individual sims
 	for count in range(0,sims):
 		if(verbosity >= 2):
@@ -220,7 +222,7 @@ def runSims(sims = 10,steps = 10,verbosity = 2,simIdent = 'Test'):
 			r = max(0,generate_r(trueS,act));
 			o = generate_o(trueS,act); 
 
-			print(act,o);
+			#print(act,o);
 
 			if(sum(dataPackage['Data'][count]['Rewards']) == 0 and r!=0):
 				allFirstCatches.append(step); 
