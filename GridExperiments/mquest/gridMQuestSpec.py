@@ -150,7 +150,7 @@ def generate_r(s,a):
 	if(dist(s) < 0.5):
 		return 1; 
 	else:
-		return 0.01;  
+		return 0;  
 
 
 def generate_o(s,a):
