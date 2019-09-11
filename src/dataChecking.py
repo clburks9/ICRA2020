@@ -4,15 +4,17 @@ import matplotlib.pyplot as plt
 from scipy.stats import ttest_ind as ttest
 from scipy.stats import ttest_rel as tRel
 import matplotlib.colors as mcolors
-
+import sys
+sys.path.append("../GridExperiments/common"); 
+from roadNode import RoadNode
 
 def checkData():
 	print("Remember to cull and replace bad runs where they started on top of each other")
 
 
 	#golfRun = ['dataGolf_E1_B.npy','dataGolfHumanDirs_E1_B.npy','dataGolf_E1_Perfect.npy']; 
-	golfRun = ['dataGolf_E1_E.npy','dataGolfHumanFactored_E1_E.npy','dataGolf_E1_Perfect-RunE.npy']; 
-	
+	#golfRun = ['dataGolf_E1_E.npy','dataGolfHumanFactored_E1_E.npy','dataGolf_E1_Perfect-RunE.npy']; 
+	golfRun = ['dataGridMode_E2_A.npy','dataGridMQuest_E2_A.npy']; 
 
 	allCatchNames = []; 
 	allQueryNames = []; 
@@ -42,13 +44,15 @@ def checkData():
 				if(rew[i]==1):
 					if(i<4):
 						allExceptions[golfRun.index(name)] += 1; 
+						#print(i)
 						break; 
 					allCatch.append(i);
 					break; 
 				# if(i==99):
 				# 	allCatch.append(100);
 
-
+		
+		#print(len(allCatch)/26)
 		print(name,100*(len(allCatch)/max(1,100-allExceptions[golfRun.index(name)])),np.mean(allCatch),np.std(allCatch));
 		allCatchNames.append(np.array(allCatch)); 
 		allQueryNames.append(np.array(allQueries)); 
@@ -58,8 +62,8 @@ def checkData():
 	allCatchNames = np.array(allCatchNames);
 	allQueryNames = np.array(allQueryNames)
 
-	allStats = np.zeros(shape=(3,3)); 
-	for i in range(0,3):
+	allStats = np.zeros(shape=(2,2)); 
+	for i in range(0,2):
 		for j in range(0,i):
 			t,p = ttest(allCatchNames[i],allCatchNames[j],nan_policy='omit'); 
 			allStats[i,j] = p; 
@@ -399,9 +403,9 @@ if __name__ == '__main__':
 
 
 
-	#checkData(); 
+	checkData(); 
 	#estimateGraph(); 
 	#heatMap(); 
 	#questions(); 
 
-	resAcc(scen='E',save=True); 
+	#resAcc(scen='E',save=True); 
