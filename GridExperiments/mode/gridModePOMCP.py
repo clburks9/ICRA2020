@@ -56,8 +56,8 @@ class POMCP:
 		#else recurse 
 		if(o not in h[act].getChildrenIDs()):
 			h[act].addChildID(o); 
-			#return estimate_value(s,h[act]); 
-			return rollout(s,depth); 
+			return estimate_value(s,h[act]); 
+			#return rollout(s,depth); 
 		
 		if(isTerminal(s,act)):
 			return r
@@ -203,7 +203,7 @@ def runSims(sims = 10,steps = 10,verbosity = 2,simIdent = 'Test'):
 	
 	allFirstCatches = []; 
 
-	np.random.seed(2342342); 
+	np.random.seed(23423421); 
 
 	#run individual sims
 	for count in range(0,sims):
@@ -250,6 +250,7 @@ def runSims(sims = 10,steps = 10,verbosity = 2,simIdent = 'Test'):
 
 			act,info = solver.search(sSet,h,depth = min(maxDepth,steps-step+1),inform=True);
 
+			print(info)
 
 
 			trueS = generate_s(trueS,act); 

@@ -13,12 +13,12 @@ maxTime = 2;
 maxDepth = 15;
 c=1;
 maxTreeQueries = 2000; 
-agentSpeed = 1; 
+agentSpeed = .5; 
 problemName = 'MQuestGrid'
-targetMaxSpeed = 0.25; 
-targetNoise = 0.15; 
+targetMaxSpeed = 0.15; 
+targetNoise = 0.05; 
 network = None;
-leaveRoadChance = 0.05; 
+leaveRoadChance = 0.1; 
 
 availability = 0.95; 
 accuracy = .95;
@@ -59,7 +59,6 @@ def generate_s(s,act):
 	mode = sprime[6]; 
 
 
-	leaveRoadChance = .05; 
 	#if mode is 0, check for mode transition
 	if(sprime[6] == 0):
 		coin = np.random.random(); 
@@ -195,7 +194,7 @@ def generate_o(s,a):
 def estimate_value(s,h):
 	#how far can you get in the depth left
 	
-	return min(100,1/dist(s))
+	return min(4,1/dist(s))
 
 def rollout(s,depth): 
 

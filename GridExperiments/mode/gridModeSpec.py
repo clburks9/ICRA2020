@@ -13,11 +13,11 @@ maxTime = 2;
 maxDepth = 15;
 c=1;
 maxTreeQueries = 2000; 
-agentSpeed = 1; 
+agentSpeed = .5; 
 problemName = 'ModeGrid'
-leaveRoadChance = 0.05; 
-targetMaxSpeed = 0.25; 
-targetNoise = 0.15; 
+leaveRoadChance = 0.1; 
+targetMaxSpeed = 0.15; 
+targetNoise = 0.05; 
 network = None;
 
 bounds = [8,8]; 
