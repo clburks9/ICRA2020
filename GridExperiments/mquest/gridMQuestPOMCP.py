@@ -169,7 +169,7 @@ def runSims(sims = 10,steps = 10,verbosity = 2,simIdent = 'Test'):
 	
 	allFirstCatches = []; 
 
-	np.random.seed(234234); 
+	np.random.seed(2342342); 
 
 	#run individual sims
 	for count in range(0,sims):
