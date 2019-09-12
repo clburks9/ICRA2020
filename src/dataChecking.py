@@ -9,12 +9,14 @@ sys.path.append("../GridExperiments/common");
 from roadNode import RoadNode
 
 def checkData():
-	print("Remember to cull and replace bad runs where they started on top of each other")
+	#print("Remember to cull and replace bad runs where they started on top of each other")
 
 
 	#golfRun = ['dataGolf_E1_B.npy','dataGolfHumanDirs_E1_B.npy','dataGolf_E1_Perfect.npy']; 
 	#golfRun = ['dataGolf_E1_E.npy','dataGolfHumanFactored_E1_E.npy','dataGolf_E1_Perfect-RunE.npy']; 
-	golfRun = ['dataGridMode_E2_A.npy','dataGridMQuest_E2_A.npy']; 
+	#golfRun = ['dataGridMode_E2_A.npy','dataGridMQuest_E2_A.npy']; 
+	golfRun = ['dataGridMode_E2_B.npy','dataGridMQuest_E2_B.npy']; 
+	#golfRun = ['dataGridMode_E2_C.npy','dataGridMQuest_E2_C.npy']; 
 
 	allCatchNames = []; 
 	allQueryNames = []; 
@@ -53,7 +55,7 @@ def checkData():
 
 		
 		#print(len(allCatch)/26)
-		print(name,100*(len(allCatch)/max(1,100-allExceptions[golfRun.index(name)])),np.mean(allCatch),np.std(allCatch));
+		print(name,np.mean(allCatch),np.std(allCatch));
 		allCatchNames.append(np.array(allCatch)); 
 		allQueryNames.append(np.array(allQueries)); 
 		# print(data[3]['States'][0]); 
@@ -75,11 +77,135 @@ def checkData():
 	#print(allQueryNames[1].tolist())
 
 
+def gridEstimates():
+	gridRun = ['dataGridMode_E2_B.npy','dataGridMQuest_E2_B.npy']; 
+
+	allErrors = np.zeros(shape=(2,100,101));  
+	allSD = np.zeros(shape=(2,100,101)); 
+	allHits = [0,0]; 
+	for name in gridRun:
+		#fileData = np.load('/mnt/c/Users/clbur/OneDrive/Work Docs/Projects/HARPS 2019/Data/data{}_E1_{}.npy'.format(n,run),allow_pickle=True,encoding='latin1').item(); 
+
+		fileData = np.load('/mnt/c/Users/clbur/OneDrive/Work Docs/Projects/HARPS 2019/Data/{}'.format(name),allow_pickle=True,encoding='latin1').item(); 
+
+		meta = fileData['Meta']; 
+		data = fileData['Data']; 
+
+		error = []; 
+
+		for run in data:
+			states = run['States']; 
+			bel = run['Beliefs'] 
+			rew = run['Rewards']
+
+			#print(bel[0][0])
+
+			for i in range(0,len(states)):
+				#error.append(np.mean(np.square(np.array(states[i])[2:3]-np.array(bel[i][0][2:3]))))
+				error = np.sqrt(np.mean((states[i][2] - bel[i][0][0])**2 + (states[i][3]-bel[i][0][1])**2))
+				#print(error)
+				if(np.isnan(error)):
+					#print(states[i][2],states[i][3]); 
+					#print(bel[i][0]); 
+					continue; 
+				allHits[gridRun.index(name)] += 1; 
+				#error = np.sqrt(np.mean((np.array(states[i])[2:4] - np.array(bel[i][0]))**2))
+				#print(np.array(states[i])[2:4])
+				#print(len(error)); 
+				#print(error);
+				#a = 1/0; 
+				allErrors[gridRun.index(name),data.index(run),i] += error; 
+				allSD[gridRun.index(name),data.index(run),i] += np.sqrt(bel[i][1][0]**2 + bel[i][1][1]**2); 
+				
+				# if(i<100 and rew[i] == 1):
+				# 	break; 
+	#print(allErrors);
+	print(allHits);
+	meanErrors = np.zeros(shape=(2,101));
+	meanSD = np.zeros(shape=(2,101));  
+	for n in range(0,2):
+		for i in range(0,100):
+			for j in range(0,101):
+				meanErrors[n,j] += allErrors[n,i,j]/(allHits[n]/100)
+				meanSD[n,j] += allSD[n,i,j]/(allHits[n]/100); 
+
+	x = [i for i in range(0,101)]; 
+	plt.plot(x,meanErrors[0],c='r',label='Non-Human',linewidth=3); 
+	#plt.fill_between(x,meanErrors[0]+meanSD[0],meanErrors[0]-meanSD[0],color='r',alpha=0.25)
+	plt.plot(x,meanErrors[1],c='g',label='Human',linewidth=3); 
+	#plt.fill_between(x,meanErrors[1]+meanSD[1],meanErrors[1]-meanSD[1],color='g',alpha=0.25)
+	#plt.plot(x,meanErrors[2],c='m',label='Non-Human Prior Knowledge',linewidth=3)
+	#plt.fill_between(x,meanErrors[2]+meanSD[2],meanErrors[2]-meanSD[2],color='b',alpha=0.25)
+	#plt.ylim([0,500])
+	# plt.axvline(25.47,c='g',linestyle='--')
+	# plt.axvline(34.16,c='r',linestyle='--')
+	# plt.axvline(31.22,c='m',linestyle='--')
+	#plt.xlim([0,50])
+
+	plt.legend(); 
+	plt.title("Average RMSE"); 
+	plt.xlabel("Timestep"); 
+	plt.ylabel("Error (m)"); 
+	plt.show()
+
+
+def modeEstimates():
+	gridRun = ['dataGridMode_E2_D.npy','dataGridMQuest_E2_E.npy']; 
+
+	testRun = 0; 
+
+	trueModes = np.zeros(shape=(2,100)); 
+	meanModes = np.zeros(shape=(2,100)); 
+
+	
+	for name in gridRun:
+		#fileData = np.load('/mnt/c/Users/clbur/OneDrive/Work Docs/Projects/HARPS 2019/Data/data{}_E1_{}.npy'.format(n,run),allow_pickle=True,encoding='latin1').item(); 
+
+		#fileData = np.load('/mnt/c/Users/clbur/OneDrive/Work Docs/Projects/HARPS 2019/Data/{}'.format(name),allow_pickle=True,encoding='latin1').item(); 
+		fileData = np.load('../data/{}'.format(name),allow_pickle=True,encoding='latin1').item(); 
+
+		meta = fileData['Meta']; 
+		data = fileData['Data']; 
+
+		run = data[testRun]
+		states = run['States']; 
+		modeBels = run['ModeBels']; 
+		obs = run['Observations']; 
+
+		#print(bel[0][0])
+
+		for i in range(0,len(states)-1):
+			#print(modeBels[i])
+			trueModes[gridRun.index(name),i] = states[i][6]; 
+			meanModes[gridRun.index(name),i] = modeBels[i][1]/(modeBels[i][0]+modeBels[i][1]); 
+
+
+	fig,axarr = plt.subplots(2,sharex=True); 
+	axarr[0].plot(trueModes[0],color=[1,0,0],linewidth=3,label='Mode');
+	axarr[0].plot(meanModes[0],color=[.5,0,0],linewidth=3,linestyle='--',label='Estimate');  
+	axarr[0].set_ylabel("Mode"); 
+	axarr[0].set_title("Non-human")
+	axarr[0].legend();
+
+	axarr[1].plot(trueModes[1],color=[0,0,1],linewidth=3,label='Mode');
+	axarr[1].plot(meanModes[1],color=[0,0,.5],linewidth=3,linestyle='--',label='Estimate');  
+	axarr[1].set_xlabel("Timestep"); 
+	axarr[1].set_ylabel("Mode"); 
+	axarr[1].set_title("Human")
+	axarr[1].legend()
+	fig.suptitle("Road Network Mode Estimates Example")
+
+
+	plt.show();
+
+
+
 def estimateGraph():
 	#golfRun = ['dataGolf_E1_D.npy','dataGolfHumanDirs_E1_D.npy','dataGolf_E1_Perfect-RunD.npy']; 
 	golfRun = ['dataGolf_E1_E.npy','dataGolfHumanFactored_E1_E.npy','dataGolf_E1_Perfect-RunE.npy']; 
 	#golfRun = ['dataGolf_E1_E.npy','dataGolfHumanDirs_E1_E.npy','dataGolf_E1_Perfect-RunE.npy']; 
 	
+
 	allErrors = np.zeros(shape=(3,100,101));  
 	allSD = np.zeros(shape=(3,100,101)); 
 
@@ -174,7 +300,10 @@ def heatMap():
 
 def questions():
 	#golfRun = ['dataGolf_E1_D.npy','dataGolfHumanDirs_E1_D.npy','dataGolf_E1_Perfect-RunD.npy']; 
-	golfRun = ['dataGolf_E1_E.npy','dataGolfHumanFactored_E1_E.npy','dataGolf_E1_Perfect-RunE.npy']; 
+	#golfRun = ['dataGolf_E1_E.npy','dataGolfHumanFactored_E1_E.npy','dataGolf_E1_Perfect-RunE.npy']; 
+
+	golfRun = ['dataGridMode_E2_B.npy','dataGridMQuest_E2_B.npy']; 
+
 
 	heatMaps = np.zeros(shape=(3,83,83)); 
 
@@ -403,9 +532,11 @@ if __name__ == '__main__':
 
 
 
-	checkData(); 
+	#checkData(); 
 	#estimateGraph(); 
+	#gridEstimates();
 	#heatMap(); 
 	#questions(); 
+	modeEstimates(); 
 
 	#resAcc(scen='E',save=True); 
